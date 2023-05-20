@@ -232,7 +232,9 @@ cython_debug/
       },
     },
   },
-  "README.md": "Introductory Skill so that Skill Authors can see how an OVOS Skill is put together
+  "README.md": "# HelloWorldSkill
+
+Introductory Skill so that Skill Authors can see how an OVOS Skill is put together
 
 ## About
 
@@ -446,7 +448,7 @@ greetings",
     #       options: Option 1|option_one;Option 2|option_two;Option 3|option_three
     #       value: option_one
 ",
-  "src/version.py": "__version__ = 0.0.1
+  "src/version.py": "__version__ = \\"0.0.1\\"
 ",
 }
 `;

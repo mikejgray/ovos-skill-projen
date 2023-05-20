@@ -33,6 +33,11 @@ export interface OVOSSkillProjectOptions extends GitHubProjectOptions {
    * @default "ovos skill plugin"
    */
   readonly skillKeywords?: string;
+  /**
+   * Include sample code?
+   * @default true
+   */
+  readonly sampleCode?: boolean;
 }
 
 export class OVOSSkillProject extends GitHubProject {
@@ -50,7 +55,9 @@ export class OVOSSkillProject extends GitHubProject {
     // this.restructureLocaleFolders();
     // };
     // Sample skill
-    this.createGenericSkillCode();
+    if (options.sampleCode ?? true) {
+      this.createGenericSkillCode();
+    }
     // Root files
     new SampleFile(this, 'setup.py', {
       contents: setupPy({
@@ -77,7 +84,7 @@ export class OVOSSkillProject extends GitHubProject {
     new SampleDir(this, 'src', {
       files: {
         '__init__.py': readFileSync(join(__dirname, 'files', '__init__.py')).toString(),
-        'version.py': '__version__ = 0.0.1\n',
+        'version.py': '__version__ = "0.0.1"\n',
         'settingsmeta.yaml': readFileSync(join(__dirname, 'files', 'settingsmeta.yaml')).toString(),
         'locale/en-us/dialog/hello_world.dialog': 'hello world!\nhullo world!',
         'locale/en-us/dialog/robotics.dialog': 'I am not bound by the laws of robotics',
@@ -220,14 +227,14 @@ export class OVOSSkillProject extends GitHubProject {
 
   createLocaleFolders() {
     try {
-      if (!existsSync('locale')) {
-        mkdirSync('locale');
+      if (!existsSync('src/locale')) {
+        mkdirSync('src/locale');
       }
-      mkdirSync('locale/en-us');
-      mkdirSync('locale/en-us/vocab');
-      mkdirSync('locale/en-us/dialog');
-      mkdirSync('locale/en-us/regex');
-      mkdirSync('locale/en-us/intents');
+      mkdirSync('src/locale/en-us');
+      mkdirSync('src/locale/en-us/vocab');
+      mkdirSync('src/locale/en-us/dialog');
+      mkdirSync('src/locale/en-us/regex');
+      mkdirSync('src/locale/en-us/intents');
     } catch (err) {
       console.error(err);
     }

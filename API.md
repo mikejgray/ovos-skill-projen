@@ -1,4 +1,7 @@
-# replace this
+# ovos-skill-projen
+
+`projen new --skill-class OVOSSkillProject --from "@mikejgray/ovos-skill-projen"`
+
 # API Reference <a name="API Reference" id="api-reference"></a>
 
 
@@ -51,6 +54,7 @@ const oVOSSkillProjectOptions: OVOSSkillProjectOptions = { ... }
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.githubTests">githubTests</a></code> | <code>boolean</code> | Add Github Actions for testing? |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.packageDir">packageDir</a></code> | <code>string</code> | The name of the directory containing the skill's code. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.pypiName">pypiName</a></code> | <code>string</code> | The name of the skill's PyPi package. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.sampleCode">sampleCode</a></code> | <code>boolean</code> | Include sample code? |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.skillKeywords">skillKeywords</a></code> | <code>string</code> | Keywords for your skill package. |
 
 ---
@@ -539,6 +543,19 @@ The name of the skill's PyPi package.
 ovos-hello-world-skill
 ```
 
+
+##### `sampleCode`<sup>Optional</sup> <a name="sampleCode" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.sampleCode"></a>
+
+```typescript
+public readonly sampleCode: boolean;
+```
+
+- *Type:* boolean
+- *Default:* true
+
+Include sample code?
+
+---
 
 ##### `skillKeywords`<sup>Optional</sup> <a name="skillKeywords" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.skillKeywords"></a>
 
