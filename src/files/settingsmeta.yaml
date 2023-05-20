@@ -1,0 +1,37 @@
+skillMetadata:
+  sections:
+    - name: Label Field Example
+      fields:
+        - type: label
+          label: This is descriptive text.
+    - name: Email Field Example
+      fields:
+        - name: my_email_address
+          type: email
+          label: Enter your email address
+          value:
+    - name: Password Field Example
+      fields:
+        - name: my_password
+          type: password
+          label: Enter your password
+          value:
+    # - name: Checkbox Field Example
+    #   fields:
+    #     - name: my_boolean
+    #       type: checkbox
+    #       label: This is an example checkbox. It creates a Boolean value.
+    #       value: "false" # OVOS expects a string of "true" or "false" rather than a Boolean
+    # - name: Number Field Example
+    #   fields:
+    #     - name: my_number
+    #       type: number
+    #       label: Enter any number
+    #       value: 7
+    # - name: Select Field Example
+    #   fields:
+    #     - name: my_selected_option
+    #       type: select
+    #       label: Select an option
+    #       options: Option 1|option_one;Option 2|option_two;Option 3|option_three
+    #       value: option_one

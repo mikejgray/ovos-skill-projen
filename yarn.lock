@@ -967,10 +967,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-20.1.7.tgz#ce10c802f7731909d0a44ac9888e8b3a9125eb62"
   integrity sha512-WCuw/o4GSwDGMoonES8rcvwsig77dGCMbZDrZr2x4ZZiNW4P/gcoZXe/0twgtobcTkmg9TuKflxYL/DuwDyJzg==
 
-"@types/node@^14":
-  version "14.18.47"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.18.47.tgz#89a56b05804d136cb99bf2f823bb00814a889aae"
-  integrity sha512-OuJi8bIng4wYHHA3YpKauL58dZrPxro3d0tabPHyiNF8rKfGKuVfr83oFlPLmKri1cX+Z3cJP39GXmnqkP11Gw==
+"@types/node@^16":
+  version "16.18.31"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.18.31.tgz#7de39c2b9363f0d95b129cc969fcbf98e870251c"
+  integrity sha512-KPXltf4z4g517OlVJO9XQ2357CYw7fvuJ3ZuBynjXC5Jos9i+K7LvFb7bUIwtJXSZj0vTp9Q6NJBSQpkwwO8Zw==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.1"
@@ -3852,10 +3852,10 @@ jest-jasmine2@^27.5.1:
     pretty-format "^27.5.1"
     throat "^6.0.1"
 
-jest-junit@^13:
-  version "13.2.0"
-  resolved "https://registry.yarnpkg.com/jest-junit/-/jest-junit-13.2.0.tgz#66eeb86429aafac8c1745a70f44ace185aacb943"
-  integrity sha512-B0XNlotl1rdsvFZkFfoa19mc634+rrd8E4Sskb92Bb8MmSXeWV9XJGUyctunZS1W410uAxcyYuPUGVnbcOH8cg==
+jest-junit@^15:
+  version "15.0.0"
+  resolved "https://registry.yarnpkg.com/jest-junit/-/jest-junit-15.0.0.tgz#a47544ab42e9f8fe7ada56306c218e09e52bd690"
+  integrity sha512-Z5sVX0Ag3HZdMUnD5DFlG+1gciIFSy7yIVPhOdGUi8YJaI9iLvvBb530gtQL2CHmv0JJeiwRZenr0VrSR7frvg==
   dependencies:
     mkdirp "^1.0.4"
     strip-ansi "^6.0.1"
@@ -4228,7 +4228,26 @@ jsii-rosetta@^1.81.0:
     workerpool "^6.4.0"
     yargs "^16.2.0"
 
-jsii@1.81.0:
+jsii-rosetta@~5.0.7:
+  version "5.0.8"
+  resolved "https://registry.yarnpkg.com/jsii-rosetta/-/jsii-rosetta-5.0.8.tgz#63f9de0b6898e909fa342496d7a830c25759385c"
+  integrity sha512-atv37GB6lhFJv88eXJT31zH4/dJ10Ygb6fCB1yoYDgopU9W3pErDw39verbAFgHGg4BTO7Bti/b/ewdWMoc3Pg==
+  dependencies:
+    "@jsii/check-node" "1.81.0"
+    "@jsii/spec" "^1.81.0"
+    "@xmldom/xmldom" "^0.8.7"
+    chalk "^4"
+    commonmark "^0.30.0"
+    fast-glob "^3.2.12"
+    jsii "5.0.x"
+    semver "^7.5.1"
+    semver-intersect "^1.4.0"
+    stream-json "^1.7.5"
+    typescript "~5.0.4"
+    workerpool "^6.4.0"
+    yargs "^17.7.2"
+
+jsii@1.81.0, jsii@1.x:
   version "1.81.0"
   resolved "https://registry.yarnpkg.com/jsii/-/jsii-1.81.0.tgz#144daeacfa41660d04b9c695f21c17d3ffd58515"
   integrity sha512-m5BQlNJGHFFwxUxZwagSqqMCS1wbt/0fKeEr+j7WWsG1lhu3fUxANYukUAeQEPJAPWuv0kAbqMaxj/4HSgd5RA==
@@ -4247,7 +4266,7 @@ jsii@1.81.0:
     typescript "~3.9.10"
     yargs "^16.2.0"
 
-jsii@^5.0.8:
+jsii@5.0.x:
   version "5.0.8"
   resolved "https://registry.yarnpkg.com/jsii/-/jsii-5.0.8.tgz#324c84179097d092545f0090f9517dddc8151427"
   integrity sha512-FQlEQX1o/v1CnkYsap7iPQH/L0QRzo8zv00L28qdcfAYuUGNlBc35q8G7G5zmrQfionVxDdpz00l8l+Fj6I2hA==
@@ -4302,11 +4321,6 @@ json-schema-traverse@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/json-schema-traverse/-/json-schema-traverse-1.0.0.tgz#ae7bcb3656ab77a73ba5c49bf654f38e6b6860e2"
   integrity sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==
-
-json-schema@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/json-schema/-/json-schema-0.4.0.tgz#f7de4cf6efab838ebaeb3236474cbba5a1930ab5"
-  integrity sha512-es94M3nTIfsEPisRafak+HDLfHXnKBhV3vU5eqPcS3flIWqcxJWgXHXiey3YrpaNsanY5ei1VoYEbOzijuq9BA==
 
 json-stable-stringify-without-jsonify@^1.0.1:
   version "1.0.1"
@@ -6465,9 +6479,9 @@ typescript@^5.0.4, typescript@~5.0.4:
   integrity sha512-cW9T5W9xY37cc+jfEnaUvX91foxtHkza3Nw3wkoF4sSlKn0MONdkdEndig/qPBWXNkmplh3NzayQzCiHM4/hqw==
 
 typescript@next:
-  version "5.2.0-dev.20230516"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.2.0-dev.20230516.tgz#9dc4d02c031cdf311ddb6ee646be09d5f13de4c9"
-  integrity sha512-DGK8md4PQgA6QG9JnvC6LecNnBstc1h6zrg71isrlZTsRFVl3EsID6D2Exrh4ULbxynA61PE13M+uOmLFWOu4w==
+  version "5.2.0-dev.20230519"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.2.0-dev.20230519.tgz#7b3fcd9e7a9040a090747c975fab888735a9d761"
+  integrity sha512-3ylSjHrr9oN98tNhwSauXs9bWl4kGiZvIbAKihcGy76HjXrzbKFT6R25f+WT52S1GvAyp3Wz7e4n56ZztPhohA==
 
 typescript@~3.9.10:
   version "3.9.10"
