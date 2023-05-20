@@ -1,5 +1,6 @@
 {
   "name": "@mikejgray/ovos-skill-projen",
+  "description": "A projen project for creating OVOS skills, or retrofitting Mycroft skills to OVOS",
   "repository": {
     "type": "git",
     "url": "https://github.com/mikejgray/ovos-skill-projen.git"

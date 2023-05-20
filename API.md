@@ -499,7 +499,7 @@ public readonly githubTests: boolean;
 ```
 
 - *Type:* boolean
-- *Default:* false
+- *Default:* true
 
 Add Github Actions for testing?
 

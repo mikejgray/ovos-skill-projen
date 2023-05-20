@@ -3,12 +3,12 @@ import { join } from 'path';
 import { SampleDir, SampleFile } from 'projen';
 import { GitHubProject, GitHubProjectOptions } from 'projen/lib/github';
 import { setupPy } from './files/setup.py';
-import { LicenseTestsWorkflow, PublishAlphaWorkflow } from './GithubWorkflows';
+import { LicenseTestsWorkflow, PublishAlphaWorkflow, SkillTestsWorkflow, UpdateSkillJsonWorkflow } from './GithubWorkflows';
 
 export interface OVOSSkillProjectOptions extends GitHubProjectOptions {
   /**
    * Add Github Actions for testing?
-   * @default false
+   * @default true
    */
   readonly githubTests?: boolean;
   /**
@@ -49,7 +49,7 @@ export class OVOSSkillProject extends GitHubProject {
     // gitignore
     this.gitignore.addPatterns('.DS_Store');
     this.addPythonGitIgnore();
-    // Locale folder
+    // Locale folders
     this.createLocaleFolders();
     // if (options.condenseLocaleFolders) {
     // this.restructureLocaleFolders();
@@ -59,6 +59,7 @@ export class OVOSSkillProject extends GitHubProject {
       this.createGenericSkillCode();
     }
     // Root files
+    // TODO: Pass in actual values from project
     new SampleFile(this, 'setup.py', {
       contents: setupPy({
         repositoryUrl: 'PLACEHOLDER',
@@ -74,7 +75,7 @@ export class OVOSSkillProject extends GitHubProject {
       contents: 'ovos-utils\novos-bus-client\novos-workshop',
     });
     // Github Actions
-    if (options.githubTests) {
+    if (options.githubTests ?? true) {
       this.createGithubWorkflows();
     }
   }
@@ -242,17 +243,22 @@ export class OVOSSkillProject extends GitHubProject {
 
   createGithubWorkflows() {
     new LicenseTestsWorkflow(this.github!);
-    new PublishAlphaWorkflow(this.github!); // TODO:
+    new PublishAlphaWorkflow(this.github!);
     // new PublishBuildWorkflow(this.github!); // TODO:
-    // new SkillTestsWorkflow(this.github!);
-    // new UpdateSkillJsonWorkflow(this.github!);
+    new SkillTestsWorkflow(this.github!);
+    new UpdateSkillJsonWorkflow(this.github!);
   }
 
   // Retrofitting methods
   // restructureLocaleFolders() { // TODO: Handle localization, this structure is wrong
   //   ['ui', 'vocab', 'dialog', 'regex', 'intents'].forEach((dir) => {
   //     try {
-  //       renameSync(dir, `locale/${dir}`);
+  //       if (!existsSync('src/locale')) {
+  //         mkdirSync('src/locale');
+  //       }
+  //       // For each language code directory in ${dir}, rename it to `src/locale/${language_code}/${dir}`
+  //       // TODO: The next line is wrong
+  //       renameSync(dir, `src/locale/${dir}`);
   //     } catch (err) {
   //       console.error(err);
   //     }
