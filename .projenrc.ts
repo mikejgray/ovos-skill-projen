@@ -6,7 +6,7 @@ const project = new cdk.JsiiProject({
   author: 'Mike Gray',
   authorAddress: 'mike@graywind.org',
   defaultReleaseBranch: 'main',
-  name: '@mikejgray/ovos-skill',
+  name: '@mikejgray/ovos-skill-projen',
   projenrcTs: true,
   repositoryUrl: 'https://github.com/mikejgray/ovos-skill-projen.git',
   repository: 'https://github.com/mikejgray/ovos-skill-projen.git',

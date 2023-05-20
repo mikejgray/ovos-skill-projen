@@ -1,5 +1,5 @@
 {
-  "name": "@mikejgray/ovos-skill",
+  "name": "@mikejgray/ovos-skill-projen",
   "repository": {
     "type": "git",
     "url": "https://github.com/mikejgray/ovos-skill-projen.git"
