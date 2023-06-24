@@ -49,7 +49,6 @@ export const setupPy = ({
 }: setupPyInterface): string => {
   return `#!/usr/bin/env python3
 from setuptools import setup
-import os
 from os import walk, path
 
 BASEDIR = path.abspath(path.dirname(__file__))
@@ -62,7 +61,7 @@ SKILL_AUTHOR, SKILL_NAME = URL.split(".com/")[-1].split("/")
 SKILL_PKG = SKILL_NAME.lower().replace("-", "_")
 PLUGIN_ENTRY_POINT = f"{SKILL_NAME.lower()}.{SKILL_AUTHOR.lower()}={SKILL_PKG}:{SKILL_CLAZZ}"
 # skill_id=package_name:SkillClass
-BASE_PATH = path.abspath(path.dirname(__file__), "${packageDir}")
+BASE_PATH = BASE_PATH = path.abspath(path.join(path.dirname(__file__), "${packageDir}"))
 
 
 def get_version():
@@ -88,6 +87,7 @@ def get_version():
         version += f"a{alpha}"
     return version
 
+    
 def get_requirements(requirements_filename: str):
     requirements_file = path.join(BASE_PATH, requirements_filename)
     with open(requirements_file, "r", encoding="utf-8") as r:
