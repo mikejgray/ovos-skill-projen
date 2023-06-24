@@ -3,15 +3,16 @@ import { existsSync, mkdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { SampleDir, SampleFile } from 'projen';
 import { GitHubProject, GitHubProjectOptions } from 'projen/lib/github';
+import { Projenrc } from 'projen/lib/python';
 import { setupPy } from './files/setup.py';
 import { LicenseTestsWorkflow, ProposeReleaseWorkflow, PublishAlphaWorkflow, PublishReleaseWorkflow, SkillTestsWorkflow, UpdateSkillJsonWorkflow } from './GithubWorkflows';
 
 export interface OVOSSkillProjectOptions extends GitHubProjectOptions {
   /**
-   * Add Github Actions for testing?
+   * Add Github Actions workflows?
    * @default true
    */
-  readonly githubTests?: boolean;
+  readonly githubWorkflows?: boolean;
   /**
    * The name of the skill class
    * @example HelloWorldSkill
@@ -39,6 +40,24 @@ export interface OVOSSkillProjectOptions extends GitHubProjectOptions {
    * @default true
    */
   readonly sampleCode?: boolean;
+  /**
+   * The name of the skill's author.
+   * @default "TODO: Your Name"
+   * @example "Mike Gray"
+   */
+  readonly author?: string;
+  /**
+   * The email address of the skill's author.
+   * @default "TODO: Your Email"
+   * @example "mike@graywind.org"
+   */
+  readonly authorAddress?: string;
+  /**
+   * The URL of the skill's GitHub repository.
+   * @default "TODO: PLACEHOLDER"
+   * @example "https://github.com/OpenVoiceOS/ovos-hello-world-skill"
+   */
+  readonly repositoryUrl?: string;
 }
 
 export class OVOSSkillProject extends GitHubProject {
@@ -47,6 +66,8 @@ export class OVOSSkillProject extends GitHubProject {
       readme: { contents: readFileSync(join(__dirname, 'files', 'README.md')).toString() },
       ...options,
     });
+    // projenrc.py
+    new Projenrc(this, {});
     // gitignore
     this.gitignore.addPatterns('.DS_Store', 'node_modules');
     this.addPythonGitIgnore();
@@ -62,11 +83,11 @@ export class OVOSSkillProject extends GitHubProject {
     // Root files
     new SampleFile(this, 'setup.py', {
       contents: setupPy({
-        repositoryUrl: 'PLACEHOLDER',
+        repositoryUrl: options.repositoryUrl ?? 'TODO: PLACEHOLDER',
         packageDir: options.packageDir ?? 'src',
-        pypiName: options.pypiName ?? __dirname,
-        author: 'Joe Placeholder',
-        authorAddress: 'joe@placeholder.com',
+        pypiName: options.pypiName ?? process.cwd().split('/').pop()!,
+        author: options.author ?? 'TODO: Your Name',
+        authorAddress: options.authorAddress ?? 'TODO: Your Email',
       }),
     });
     new SampleFile(this, 'skill.json', {
@@ -76,9 +97,10 @@ export class OVOSSkillProject extends GitHubProject {
       contents: 'ovos-utils\novos-bus-client\novos-workshop',
     });
     // Github Actions
-    if (options.githubTests ?? true) {
+    if (options.githubWorkflows ?? true) {
       this.createGithubWorkflows();
     }
+    this.createDevBranch();
   }
 
   // Methods
@@ -230,6 +252,7 @@ export class OVOSSkillProject extends GitHubProject {
   createLocaleFolders() {
     try {
       if (!existsSync('src/locale')) {
+        mkdirSync('src');
         mkdirSync('src/locale');
       }
       mkdirSync('src/locale/en-us');
