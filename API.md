@@ -75,6 +75,7 @@ const oVOSSkillProjectOptions: OVOSSkillProjectOptions = { ... }
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.skillClass">skillClass</a></code> | <code>string</code> | The name of the skill class. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.author">author</a></code> | <code>string</code> | The name of the skill's author. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.authorAddress">authorAddress</a></code> | <code>string</code> | The email address of the skill's author. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.authorHandle">authorHandle</a></code> | <code>string</code> | The GitHub handle of the skill's author. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.githubWorkflows">githubWorkflows</a></code> | <code>boolean</code> | Add Github Actions workflows? |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.packageDir">packageDir</a></code> | <code>string</code> | The name of the directory containing the skill's code. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.pypiName">pypiName</a></code> | <code>string</code> | The name of the skill's PyPi package. |
@@ -554,6 +555,26 @@ The email address of the skill's author.
 
 ```typescript
 "mike@graywind.org"
+```
+
+
+##### `authorHandle`<sup>Optional</sup> <a name="authorHandle" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.authorHandle"></a>
+
+```typescript
+public readonly authorHandle: string;
+```
+
+- *Type:* string
+- *Default:* ""
+
+The GitHub handle of the skill's author.
+
+---
+
+*Example*
+
+```typescript
+"mikejgray"
 ```
 
 
