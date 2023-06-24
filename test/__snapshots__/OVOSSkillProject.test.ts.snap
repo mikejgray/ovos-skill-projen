@@ -442,7 +442,7 @@ from os import walk, path
 BASEDIR = path.abspath(path.dirname(__file__))
 URL = \\"PLACEHOLDER\\"
 SKILL_CLAZZ = \\"HelloWorldSkill\\"  # needs to match __init__.py class name
-PYPI_NAME = \\"/Users/Mike/Documents/coding/VoiceAssistants/Neon/ovos-skill/src\\"  # pip install PYPI_NAME
+PYPI_NAME = \\"test-skill\\"  # pip install PYPI_NAME
 
 # below derived from github url to ensure standard skill_id
 SKILL_AUTHOR, SKILL_NAME = URL.split(\\".com/\\")[-1].split(\\"/\\")
