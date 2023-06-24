@@ -73,9 +73,12 @@ const oVOSSkillProjectOptions: OVOSSkillProjectOptions = { ... }
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.staleOptions">staleOptions</a></code> | <code>projen.github.StaleOptions</code> | Auto-close stale issues and pull requests. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.vscode">vscode</a></code> | <code>boolean</code> | Enable VSCode integration. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.skillClass">skillClass</a></code> | <code>string</code> | The name of the skill class. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.githubTests">githubTests</a></code> | <code>boolean</code> | Add Github Actions for testing? |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.author">author</a></code> | <code>string</code> | The name of the skill's author. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.authorAddress">authorAddress</a></code> | <code>string</code> | The email address of the skill's author. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.githubWorkflows">githubWorkflows</a></code> | <code>boolean</code> | Add Github Actions workflows? |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.packageDir">packageDir</a></code> | <code>string</code> | The name of the directory containing the skill's code. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.pypiName">pypiName</a></code> | <code>string</code> | The name of the skill's PyPi package. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.repositoryUrl">repositoryUrl</a></code> | <code>string</code> | The URL of the skill's GitHub repository. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.sampleCode">sampleCode</a></code> | <code>boolean</code> | Include sample code? |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.skillKeywords">skillKeywords</a></code> | <code>string</code> | Keywords for your skill package. |
 
@@ -514,16 +517,56 @@ HelloWorldSkill
 ```
 
 
-##### `githubTests`<sup>Optional</sup> <a name="githubTests" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.githubTests"></a>
+##### `author`<sup>Optional</sup> <a name="author" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.author"></a>
 
 ```typescript
-public readonly githubTests: boolean;
+public readonly author: string;
+```
+
+- *Type:* string
+- *Default:* "TODO: Your Name"
+
+The name of the skill's author.
+
+---
+
+*Example*
+
+```typescript
+"Mike Gray"
+```
+
+
+##### `authorAddress`<sup>Optional</sup> <a name="authorAddress" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.authorAddress"></a>
+
+```typescript
+public readonly authorAddress: string;
+```
+
+- *Type:* string
+- *Default:* "TODO: Your Email"
+
+The email address of the skill's author.
+
+---
+
+*Example*
+
+```typescript
+"mike@graywind.org"
+```
+
+
+##### `githubWorkflows`<sup>Optional</sup> <a name="githubWorkflows" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.githubWorkflows"></a>
+
+```typescript
+public readonly githubWorkflows: boolean;
 ```
 
 - *Type:* boolean
 - *Default:* true
 
-Add Github Actions for testing?
+Add Github Actions workflows?
 
 ---
 
@@ -563,6 +606,26 @@ The name of the skill's PyPi package.
 
 ```typescript
 ovos-hello-world-skill
+```
+
+
+##### `repositoryUrl`<sup>Optional</sup> <a name="repositoryUrl" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.repositoryUrl"></a>
+
+```typescript
+public readonly repositoryUrl: string;
+```
+
+- *Type:* string
+- *Default:* "TODO: PLACEHOLDER"
+
+The URL of the skill's GitHub repository.
+
+---
+
+*Example*
+
+```typescript
+"https://github.com/OpenVoiceOS/ovos-hello-world-skill"
 ```
 
 
