@@ -1,5 +1,27 @@
 # ovos-skill-projen
 
+This [projen](https://projen.io/) project template is used to create a new OVOS Skill, which can be used with both [OVOS](https://openvoiceos.com) and [Neon.AI](https://neon.ai) voice assistants.
+
+## Installing projen
+
+Projen was created by primarily TypeScript developers working in the AWS CDK ecosystem, so it is written in TypeScript and requires Node.js to run.
+
+Generally, it is recommended to use `nvm` (Node Version Manager) to install Node.js on Linux and macOS. Instructions for installing `nvm` can be found at [github.com/nvm-sh/nvm](https://github.com/nvm-sh/nvm).
+
+After you've installed Node, projen can be installed globally with:
+
+`npm install -g projen`
+
+Generally, most `projen` users alias the `npx projen` command to `pj` for convenience. This can be done with:
+
+`alias pj='npx projen'`
+
+Add that to your `~/.bashrc` or `~/.zshrc` file to make it permanent. Be sure to run `source ~/.bashrc` or `source ~/.zshrc` to reload your shell after adding the line above.
+
+## Usage
+
+In a new directory, run:
+
 `projen new --skill-class OVOSSkillProject --from "@mikejgray/ovos-skill-projen"`
 
 # API Reference <a name="API Reference" id="api-reference"></a>
@@ -499,7 +521,7 @@ public readonly githubTests: boolean;
 ```
 
 - *Type:* boolean
-- *Default:* false
+- *Default:* true
 
 Add Github Actions for testing?
 
@@ -614,6 +636,7 @@ new OVOSSkillProject(options: OVOSSkillProjectOptions)
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindObjectFile">tryFindObjectFile</a></code> | Finds an object file (like JsonFile, YamlFile, etc.) by name. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.tryRemoveFile">tryRemoveFile</a></code> | Finds a file at the specified relative path within this project and removes it. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.addPythonGitIgnore">addPythonGitIgnore</a></code> | *No description.* |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createDevBranch">createDevBranch</a></code> | *No description.* |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createGenericSkillCode">createGenericSkillCode</a></code> | *No description.* |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createGithubWorkflows">createGithubWorkflows</a></code> | *No description.* |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createLocaleFolders">createLocaleFolders</a></code> | *No description.* |
@@ -880,6 +903,12 @@ resolved from the root of _this_ project.
 
 ```typescript
 public addPythonGitIgnore(): void
+```
+
+##### `createDevBranch` <a name="createDevBranch" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createDevBranch"></a>
+
+```typescript
+public createDevBranch(): void
 ```
 
 ##### `createGenericSkillCode` <a name="createGenericSkillCode" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createGenericSkillCode"></a>
