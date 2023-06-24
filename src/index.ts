@@ -48,10 +48,8 @@ export class OVOSSkillProject extends GitHubProject {
       ...options,
     });
     // gitignore
-    this.gitignore.addPatterns('.DS_Store');
+    this.gitignore.addPatterns('.DS_Store', 'node_modules');
     this.addPythonGitIgnore();
-    // Locale folders
-    this.createLocaleFolders();
     // if (options.condenseLocaleFolders) {
     // this.restructureLocaleFolders();
     // };
@@ -59,12 +57,13 @@ export class OVOSSkillProject extends GitHubProject {
     if (options.sampleCode ?? true) {
       this.createGenericSkillCode();
     }
+    // Locale folders
+    this.createLocaleFolders();
     // Root files
-    // TODO: Pass in actual values from project
     new SampleFile(this, 'setup.py', {
       contents: setupPy({
         repositoryUrl: 'PLACEHOLDER',
-        packageDir: options.packageDir ?? '',
+        packageDir: options.packageDir ?? 'src',
         pypiName: options.pypiName ?? __dirname,
         author: 'Joe Placeholder',
         authorAddress: 'joe@placeholder.com',

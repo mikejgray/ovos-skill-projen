@@ -62,7 +62,7 @@ SKILL_AUTHOR, SKILL_NAME = URL.split(".com/")[-1].split("/")
 SKILL_PKG = SKILL_NAME.lower().replace("-", "_")
 PLUGIN_ENTRY_POINT = f"{SKILL_NAME.lower()}.{SKILL_AUTHOR.lower()}={SKILL_PKG}:{SKILL_CLAZZ}"
 # skill_id=package_name:SkillClass
-BASE_PATH = path.abspath(path.dirname(__file__)${packageDir ? ' + f"/{packageDir}"' : ''}})
+BASE_PATH = path.abspath(path.dirname(__file__), "${packageDir}")
 
 
 def get_version():
