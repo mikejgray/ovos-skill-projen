@@ -1,9 +1,9 @@
 import { exec } from 'child_process';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { SampleDir, SampleFile } from 'projen';
+import { ProjenrcJson, SampleDir, SampleFile } from 'projen';
 import { GitHubProject, GitHubProjectOptions } from 'projen/lib/github';
-import { Projenrc } from 'projen/lib/python';
+import { readmeMd } from './files/README.md';
 import { setupPy } from './files/setup.py';
 import { LicenseTestsWorkflow, ProposeReleaseWorkflow, PublishAlphaWorkflow, PublishReleaseWorkflow, SkillTestsWorkflow, UpdateSkillJsonWorkflow } from './GithubWorkflows';
 
@@ -47,6 +47,12 @@ export interface OVOSSkillProjectOptions extends GitHubProjectOptions {
    */
   readonly author?: string;
   /**
+   * The GitHub handle of the skill's author.
+   * @default ""
+   * @example "mikejgray"
+   */
+  readonly authorHandle?: string;
+  /**
    * The email address of the skill's author.
    * @default "TODO: Your Email"
    * @example "mike@graywind.org"
@@ -62,12 +68,20 @@ export interface OVOSSkillProjectOptions extends GitHubProjectOptions {
 
 export class OVOSSkillProject extends GitHubProject {
   constructor(options: OVOSSkillProjectOptions) {
+    const author = options.author ?? 'TODO: Your Name';
     super({
-      readme: { contents: readFileSync(join(__dirname, 'files', 'README.md')).toString() },
+      readme: {
+        contents: readmeMd({
+          skillClass: options.skillClass,
+          authorName: author,
+          authorHandle: options.authorHandle ?? '',
+          skillKeywords: options.skillKeywords ?? 'ovos skill',
+        }),
+      },
       ...options,
     });
-    // projenrc.py
-    new Projenrc(this, {});
+    // projenrc.json
+    new ProjenrcJson(this, {});
     // gitignore
     this.gitignore.addPatterns('.DS_Store', 'node_modules');
     this.addPythonGitIgnore();
@@ -84,7 +98,7 @@ export class OVOSSkillProject extends GitHubProject {
         repositoryUrl: options.repositoryUrl ?? 'TODO: PLACEHOLDER',
         packageDir: options.packageDir ?? 'src',
         pypiName: options.pypiName ?? process.cwd().split('/').pop()!,
-        author: options.author ?? 'TODO: Your Name',
+        author: author,
         authorAddress: options.authorAddress ?? 'TODO: Your Email',
       }),
     });
