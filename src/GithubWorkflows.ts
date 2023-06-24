@@ -5,7 +5,7 @@ import { JobPermission } from 'projen/lib/github/workflows-model';
 export class LicenseTestsWorkflow extends GithubWorkflow {
   constructor(github: GitHub) {
     super(github, 'license_tests');
-    this.on({ push: {}, workflowDispatch: {} });
+    this.on({ push: {}, workflowDispatch: {}, pullRequest: { branches: ['master', 'main'] } });
     this.addJob('license_tests', {
       name: 'license_tests',
       uses: 'neongeckocom/.github/.github/workflows/license_tests.yml@master',
@@ -14,32 +14,26 @@ export class LicenseTestsWorkflow extends GithubWorkflow {
   }
 }
 
-export class PublishAlphaWorkflow extends GithubWorkflow {
+export class ProposeReleaseWorkflow extends GithubWorkflow {
   constructor(github: GitHub) {
-    super(github, 'publish_alpha');
+    super(github, 'propose_release');
     this.on({
-      push: {
-        paths: [
-          '!ovos_utils/version.py',
-          '!test/**',
-          '!examples/**',
-          '!.github/**',
-          '!.gitignore',
-          '!LICENSE',
-          '!CHANGELOG.md',
-          '!MANIFEST.in',
-          '!readme.md',
-          '!scripts/*',
-        ],
+      workflowDispatch: {
+        inputs: {
+          release_type: {
+            type: 'choice',
+            description: 'Release Type',
+            options: ['build', 'minor', 'major', 'patch', 'alpha'],
+          },
+        },
       },
-      workflowDispatch: {},
     });
     this.addJob('update_version', {
       name: 'update_version',
       uses: 'neongeckocom/.github/.github/workflows/propose_semver_release.yml@master',
       with: {
-        release_type: 'alpha',
-        version_file: 'ovos_utils/version.py',
+        release_type: '${{ inputs.release_type }}',
+        version_file: 'version.py',
         alpha_var: 'VERSION_ALPHA',
         build_var: 'VERSION_BUILD',
         minor_var: 'VERSION_MINOR',
@@ -49,62 +43,72 @@ export class PublishAlphaWorkflow extends GithubWorkflow {
       },
       permissions: { contents: JobPermission.WRITE, packages: JobPermission.WRITE },
     });
-    this.addJob('build_and_publish', {
-      runsOn: ['ubuntu-latest'],
+    this.addJob('pull_changes', {
       needs: ['update_version'],
-      permissions: { contents: JobPermission.READ, packages: JobPermission.READ },
+      uses: 'neongeckocom/.github/.github/workflows/pull_master.yml@master',
       with: {
-        release_type: 'alpha',
-        version_file: 'ovos_utils/version.py',
-        alpha_var: 'VERSION_ALPHA',
-        build_var: 'VERSION_BUILD',
-        minor_var: 'VERSION_MINOR',
-        major_var: 'VERSION_MAJOR',
-        update_changelog: true,
-        branch: 'dev',
+        pr_assignee: '$\{\{ github.actor \}\}',
+        pr_draft: false,
+        pr_title: '$\{\{ needs.update_version.outputs.version \}\}',
+        pr_body: '$\{\{ needs.update_version.outputs.changelog \}\}',
       },
-      steps: [
-        {
-          name: 'Create Release',
-          id: 'create_release',
-          uses: 'actions/create-release@v1',
-          env: { GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}' },
-          with: {
-            tag_name: 'V${{ needs.update_version.outputs.version }}',
-            release_name: 'Release ${{ needs.update_version.outputs.version }}',
-            body: 'Changes in this Release\n${{ needs.update_version.outputs.changelog }}',
-            draft: false,
-            prerelease: true,
-            commitish: 'dev',
-          },
-        },
-        {
-          name: 'Checkout Repository',
-          uses: 'actions/checkout@v3',
-          with: { 'ref': 'dev', 'fetch-depth': 0 },
-        },
-        {
-          name: 'Build Distribution Packages',
-          run: 'python setup.py sdist bdist_wheel',
-        },
-        {
-          name: 'Publish to PyPI',
-          uses: 'pypa/gh-action-pypi-publish@release/v1',
-          with: { password: '${{ secrets.PYPI_TOKEN }}' },
-        },
-      ],
+      permissions: { contents: JobPermission.WRITE },
     });
   }
 }
 
-// export class PublishBuildWorkflow extends GithubWorkflow {
-//   constructor(github: GitHub) {
-//     super(github, 'publish_build');
-//     this.on({
-//       push: {
-//         branches: ['dev'],
-//       },
-//     });
+export class PublishAlphaWorkflow extends GithubWorkflow {
+  constructor(github: GitHub) {
+    super(github, 'publish_alpha');
+    this.on({
+      push: {
+        branches: ['dev'],
+        paths: [
+          '!version.py',
+          '!test/**',
+          '!examples/**',
+          '!.github/**',
+          '!.gitignore',
+          '!LICENSE',
+          '!CHANGELOG.md',
+          '!MANIFEST.in',
+          '!README.md',
+          '!scripts/*',
+        ],
+      },
+      workflowDispatch: {},
+    });
+    this.addJob('publish_alpha_release', {
+      uses: 'neongeckocom/.github/.github/workflows/publish_alpha_release.yml@master',
+      with: {
+        version_file: 'version.py',
+        publish_prerelease: true,
+        update_changelog: true,
+        alpha_var: 'VERSION_ALPHA',
+        build_var: 'VERSION_BUILD',
+        minor_var: 'VERSION_MINOR',
+        major_var: 'VERSION_MAJOR',
+      },
+      permissions: { contents: JobPermission.WRITE, packages: JobPermission.WRITE },
+    });
+  }
+}
+
+export class PublishReleaseWorkflow extends GithubWorkflow {
+  constructor(github: GitHub) {
+    super(github, 'publish_release');
+    this.on({
+      push: {
+        branches: ['master', 'main'],
+      },
+    });
+    this.addJob('build_and_publish_pypi_and_release', {
+      uses: 'neongeckocom/.github/.github/workflows/publish_stable_release.yml@master',
+      secrets: { PYPI_TOKEN: '$\{\{ secrets.PYPI_TOKEN \}\}' },
+      permissions: { contents: JobPermission.WRITE, packages: JobPermission.WRITE },
+    });
+  }
+}
 
 export class SkillTestsWorkflow extends GithubWorkflow {
   constructor(github: GitHub) {
