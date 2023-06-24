@@ -87,7 +87,7 @@ def get_version():
         version += f"a{alpha}"
     return version
 
-    
+
 def get_requirements(requirements_filename: str):
     requirements_file = path.join(BASE_PATH, requirements_filename)
     with open(requirements_file, "r", encoding="utf-8") as r:

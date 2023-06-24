@@ -1,5 +1,5 @@
 import { exec } from 'child_process';
-import { existsSync, mkdirSync, readFileSync } from 'fs';
+import { readFileSync } from 'fs';
 import { join } from 'path';
 import { SampleDir, SampleFile } from 'projen';
 import { GitHubProject, GitHubProjectOptions } from 'projen/lib/github';
@@ -78,8 +78,6 @@ export class OVOSSkillProject extends GitHubProject {
     if (options.sampleCode ?? true) {
       this.createGenericSkillCode();
     }
-    // Locale folders
-    this.createLocaleFolders();
     // Root files
     new SampleFile(this, 'setup.py', {
       contents: setupPy({
@@ -248,23 +246,6 @@ export class OVOSSkillProject extends GitHubProject {
       'cython_debug/',
     );
   }
-
-  createLocaleFolders() {
-    try {
-      if (!existsSync('src/locale')) {
-        mkdirSync('src');
-        mkdirSync('src/locale');
-      }
-      mkdirSync('src/locale/en-us');
-      mkdirSync('src/locale/en-us/vocab');
-      mkdirSync('src/locale/en-us/dialog');
-      mkdirSync('src/locale/en-us/regex');
-      mkdirSync('src/locale/en-us/intents');
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
   createGithubWorkflows() {
     new LicenseTestsWorkflow(this.github!);
     new ProposeReleaseWorkflow(this.github!);

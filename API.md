@@ -702,7 +702,6 @@ new OVOSSkillProject(options: OVOSSkillProjectOptions)
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createDevBranch">createDevBranch</a></code> | *No description.* |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createGenericSkillCode">createGenericSkillCode</a></code> | *No description.* |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createGithubWorkflows">createGithubWorkflows</a></code> | *No description.* |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createLocaleFolders">createLocaleFolders</a></code> | *No description.* |
 
 ---
 
@@ -984,12 +983,6 @@ public createGenericSkillCode(): void
 
 ```typescript
 public createGithubWorkflows(): void
-```
-
-##### `createLocaleFolders` <a name="createLocaleFolders" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createLocaleFolders"></a>
-
-```typescript
-public createLocaleFolders(): void
 ```
 
 
