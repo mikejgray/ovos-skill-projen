@@ -74,6 +74,18 @@ export interface OVOSSkillProjectOptions extends GitHubProjectOptions {
    * @default true
    */
   readonly condenseLocaleFolders?: boolean;
+  /**
+   * The license of the skill.
+   * @default Apache-2.0
+   * @example MIT
+   */
+  readonly license?: string;
+  /**
+   * The description of the skill. Used in setup.py.
+   * @default ""
+   * @example "A simple skill that says hello world"
+   */
+  readonly skillDescription?: string;
 }
 
 export class OVOSSkillProject extends GitHubProject {
@@ -128,6 +140,9 @@ ${line}`;
     const sampleCode = options.sampleCode ?? true;
     const skillKeywords = options.skillKeywords ?? 'ovos skill';
     const condenseLocaleFolders = options.condenseLocaleFolders ?? true;
+    const githubworkflows = options.githubWorkflows ?? true;
+    const license = options.license ?? 'Apache-2.0';
+    const skillDescription = options.skillDescription ?? '';
 
     // Super
     let superProps = { ...options };
@@ -153,7 +168,7 @@ ${line}`;
     };
     // Sample skill
     if (sampleCode && !retrofit) {
-      this.createGenericSkillCode(options.packageDir);
+      this.createGenericSkillCode(packageDir);
     }
     // Root files
     new TextFile(this, 'setup.py', {
@@ -163,6 +178,9 @@ ${line}`;
         pypiName: pypiName,
         author: author,
         authorAddress: authorAddress,
+        license: license,
+        description: skillDescription,
+        skillClass: options.skillClass,
       }).split('\n'),
     });
     new SampleFile(this, 'skill.json', {
@@ -183,7 +201,7 @@ ${line}`;
       lines: requirements.split('\n'),
     });
     // Github Actions
-    if (options.githubWorkflows ?? true) {
+    if (githubworkflows) {
       this.createGithubWorkflows();
     }
     this.createDevBranch();
@@ -196,8 +214,8 @@ ${line}`;
    * @default "src"
    * @example "hello_world_skill"
    */
-  createGenericSkillCode(dir?: string) {
-    new SampleDir(this, dir ?? 'src', {
+  createGenericSkillCode(dir: string) {
+    new SampleDir(this, dir, {
       files: {
         '__init__.py': readFileSync(join(__dirname, 'files', '__init__.py')).toString(),
         'version.py': 'VERSION_MAJOR = 0\nVERSION_MINOR = 0\nVERSION_BUILD = 1\nVERSION_ALPHA = 0',

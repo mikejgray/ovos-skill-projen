@@ -455,7 +455,7 @@ from os import walk, path
 
 BASEDIR = path.abspath(path.dirname(__file__))
 URL = \\"TODO: PLACEHOLDER\\"
-SKILL_CLAZZ = \\"HelloWorldSkill\\"  # needs to match __init__.py class name
+SKILL_CLAZZ = \\"TestSkill\\"  # needs to match __init__.py class name
 PYPI_NAME = \\"test-skill\\"  # pip install PYPI_NAME
 
 # below derived from github url to ensure standard skill_id
@@ -491,7 +491,7 @@ def get_version():
 
 
 def get_requirements(requirements_filename: str):
-    requirements_file = path.join(BASE_PATH, requirements_filename)
+    requirements_file = path.join(path.dirname(__file__), requirements_filename)
     with open(requirements_file, \\"r\\", encoding=\\"utf-8\\") as r:
         requirements = r.readlines()
     requirements = [r.strip() for r in requirements if r.strip() and not r.strip().startswith(\\"#\\")]

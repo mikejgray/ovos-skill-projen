@@ -1,6 +1,6 @@
 # ovos-skill-projen
 
-This [projen](https://projen.io/) project template is used to create a new OVOS Skill, which can be used with both [OVOS](https://openvoiceos.com) and [Neon.AI](https://neon.ai) voice assistants.
+This [projen](https://projen.io/) project template is used to create a new OVOS Skill, which can be used with both [OVOS](https://openvoiceos.com) and [Neon.AI](https://neon.ai) voice assistants. It can also be used to retrofit an existing MycroftSkill to work with OVOS' most current development practices.
 
 ## Installing projen
 
@@ -64,7 +64,7 @@ This will:
 - Overwrite your .gitignore file with a standard Python .gitignore plus `node_modules` and `.DS_Store`
 - Create a dev branch, if one does not exist, and commit the changes to it
 - Add all of OVOS' standard GitHub Actions workflows to your `.github/workflows` directory
-- Move files in `ui`, `intent`, `dialog`, etc. directories to `locale`, respecting the language folders within (WIP)
+- Move files in `ui`, `intent`, `dialog`, etc. directories to `locale`, respecting the language folders within
 - Replace Mycroft imports with their OVOS replacements in your `__init__.py` file, assuming it is in the root of the repo
 
 It will not:
@@ -130,11 +130,13 @@ const oVOSSkillProjectOptions: OVOSSkillProjectOptions = { ... }
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.authorHandle">authorHandle</a></code> | <code>string</code> | The GitHub handle of the skill's author. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.condenseLocaleFolders">condenseLocaleFolders</a></code> | <code>boolean</code> | Restructure locale folders to be more OVOS-like? |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.githubWorkflows">githubWorkflows</a></code> | <code>boolean</code> | Add Github Actions workflows? |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.license">license</a></code> | <code>string</code> | The license of the skill. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.packageDir">packageDir</a></code> | <code>string</code> | The name of the directory containing the skill's code. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.pypiName">pypiName</a></code> | <code>string</code> | The name of the skill's PyPi package. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.repositoryUrl">repositoryUrl</a></code> | <code>string</code> | The URL of the skill's GitHub repository. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.retrofit">retrofit</a></code> | <code>boolean</code> | Retrofit an existing Mycroft skill to OVOS? |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.sampleCode">sampleCode</a></code> | <code>boolean</code> | Include sample code? |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.skillDescription">skillDescription</a></code> | <code>string</code> | The description of the skill. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.skillKeywords">skillKeywords</a></code> | <code>string</code> | Keywords for your skill package. |
 
 ---
@@ -658,6 +660,26 @@ Add Github Actions workflows?
 
 ---
 
+##### `license`<sup>Optional</sup> <a name="license" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.license"></a>
+
+```typescript
+public readonly license: string;
+```
+
+- *Type:* string
+- *Default:* Apache-2.0
+
+The license of the skill.
+
+---
+
+*Example*
+
+```typescript
+MIT
+```
+
+
 ##### `packageDir`<sup>Optional</sup> <a name="packageDir" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.packageDir"></a>
 
 ```typescript
@@ -742,6 +764,28 @@ public readonly sampleCode: boolean;
 Include sample code?
 
 ---
+
+##### `skillDescription`<sup>Optional</sup> <a name="skillDescription" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.skillDescription"></a>
+
+```typescript
+public readonly skillDescription: string;
+```
+
+- *Type:* string
+- *Default:* ""
+
+The description of the skill.
+
+Used in setup.py.
+
+---
+
+*Example*
+
+```typescript
+"A simple skill that says hello world"
+```
+
 
 ##### `skillKeywords`<sup>Optional</sup> <a name="skillKeywords" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.skillKeywords"></a>
 
@@ -1082,7 +1126,7 @@ Create a dev branch if it doesn't already exist, and set it as the default branc
 ##### `createGenericSkillCode` <a name="createGenericSkillCode" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createGenericSkillCode"></a>
 
 ```typescript
-public createGenericSkillCode(dir?: string): void
+public createGenericSkillCode(dir: string): void
 ```
 
 Create a generic skill with sample code.
@@ -1094,7 +1138,7 @@ Create a generic skill with sample code.
 ```
 
 
-###### `dir`<sup>Optional</sup> <a name="dir" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createGenericSkillCode.parameter.dir"></a>
+###### `dir`<sup>Required</sup> <a name="dir" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createGenericSkillCode.parameter.dir"></a>
 
 - *Type:* string
 

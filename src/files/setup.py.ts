@@ -18,23 +18,20 @@ interface setupPyInterface {
   authorAddress: string;
   /**
    * The name of the skill class.
-   * @default HelloWorldSkill
    */
-  skillClass?: string;
+  skillClass: string;
   /**
    * The name of the skill's PyPi package.
    */
   pypiName: string;
   /**
    * The description of the skill.
-   * @default ""
    */
-  description?: string;
+  description: string;
   /**
    * The license of the skill.
-   * @default Apache-2.0
    */
-  license?: string;
+  license: string;
 }
 
 export const setupPy = ({
@@ -43,9 +40,9 @@ export const setupPy = ({
   author,
   authorAddress,
   pypiName,
-  skillClass='HelloWorldSkill',
-  description='',
-  license='Apache-2.0',
+  skillClass,
+  description,
+  license,
 }: setupPyInterface): string => {
   return `#!/usr/bin/env python3
 from setuptools import setup
@@ -89,7 +86,7 @@ def get_version():
 
 
 def get_requirements(requirements_filename: str):
-    requirements_file = path.join(BASE_PATH, requirements_filename)
+    requirements_file = path.join(path.dirname(__file__), requirements_filename)
     with open(requirements_file, "r", encoding="utf-8") as r:
         requirements = r.readlines()
     requirements = [r.strip() for r in requirements if r.strip() and not r.strip().startswith("#")]

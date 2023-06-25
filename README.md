@@ -1,6 +1,6 @@
 # ovos-skill-projen
 
-This [projen](https://projen.io/) project template is used to create a new OVOS Skill, which can be used with both [OVOS](https://openvoiceos.com) and [Neon.AI](https://neon.ai) voice assistants.
+This [projen](https://projen.io/) project template is used to create a new OVOS Skill, which can be used with both [OVOS](https://openvoiceos.com) and [Neon.AI](https://neon.ai) voice assistants. It can also be used to retrofit an existing MycroftSkill to work with OVOS' most current development practices.
 
 ## Installing projen
 
@@ -64,7 +64,7 @@ This will:
 - Overwrite your .gitignore file with a standard Python .gitignore plus `node_modules` and `.DS_Store`
 - Create a dev branch, if one does not exist, and commit the changes to it
 - Add all of OVOS' standard GitHub Actions workflows to your `.github/workflows` directory
-- Move files in `ui`, `intent`, `dialog`, etc. directories to `locale`, respecting the language folders within (WIP)
+- Move files in `ui`, `intent`, `dialog`, etc. directories to `locale`, respecting the language folders within
 - Replace Mycroft imports with their OVOS replacements in your `__init__.py` file, assuming it is in the root of the repo
 
 It will not:
