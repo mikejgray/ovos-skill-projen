@@ -188,8 +188,14 @@ ${line}`;
     });
     let requirements = 'ovos-utils\novos-bus-client\novos-workshop';
     if (retrofit) {
-      const existingRequirements = readFileSync('requirements.txt').toString();
-      requirements = `${existingRequirements}\n${requirements}`;
+      if (existsSync('requirements.txt')) {
+        const existingRequirements = readFileSync('requirements.txt').toString();
+        requirements = `${existingRequirements}\n${requirements}`;
+      } else {
+        new TextFile(this, 'requirements.txt', {
+          lines: requirements.split('\n'),
+        });
+      }
       if (existsSync('__init__.py')) {
         OVOSSkillProject.modernizeSkillCode('__init__.py');
       } else {
@@ -197,9 +203,6 @@ ${line}`;
         writeFileSync('TODO.md', `Could not find __init__.py, please update your skill manually:\n${todoMd}`);
       }
     };
-    new TextFile(this, 'requirements.txt', {
-      lines: requirements.split('\n'),
-    });
     // Github Actions
     if (githubworkflows) {
       this.createGithubWorkflows();

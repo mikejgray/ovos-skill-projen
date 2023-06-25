@@ -26,7 +26,7 @@ In a new directory, run:
 
 After the skill has been created with default options, a file called `.projenrc.json` will be generated. This file contains all of the options used to create the skill, and can be edited to change the skill's configuration. For a full list of supported options, see [`API.md`](API.md).
 
-Most commonly, you will want to change the `name`, `author`, `authorAddress`, `authorHandle`, and `repositoryUrl` options. If you prefer to have an explicitly named directory for your source code instead of the default `src`, then `packageDir` should also be set. The `type` option should be left alone, as it is used to tell projen which project template to use.
+Most commonly, you will want to change the `name`, `author`, `authorAddress`, `authorHandle`, `skillClass`, and `repositoryUrl` options. If you prefer to have an explicitly named directory for your source code instead of the default `src`, then `packageDir` should also be set. The `type` option should be left alone, as it is used to tell projen which project template to use.
 
 Example:
 
@@ -38,7 +38,8 @@ Example:
   "authorAddress": "mike@graywind.org",
   "authorHandle": "mikejgray",
   "repositoryUrl": "https://github.com/mikejgray/test-skill",
-  "packageDir": "test_skill"
+  "packageDir": "test_skill",
+  "skillClass": "TestSkill"
 }
 ```
 
