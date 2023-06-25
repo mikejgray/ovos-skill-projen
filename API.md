@@ -18,11 +18,37 @@ Generally, most `projen` users alias the `npx projen` command to `pj` for conven
 
 Add that to your `~/.bashrc` or `~/.zshrc` file to make it permanent. Be sure to run `source ~/.bashrc` or `source ~/.zshrc` to reload your shell after adding the line above.
 
-## Usage
+## Create a new skill template
 
 In a new directory, run:
 
-`projen new --skill-class OVOSSkillProject --from "@mikejgray/ovos-skill-projen"`
+`projen new ovosskill --from "@mikejgray/ovos-skill-projen"`
+
+You can also pass flags for supported projen options, such as `--author` and `--authorAddress`. For a full list of supported options, see [`API.md`](API.md)
+
+## Retrofitting Mycroft skills
+
+If you have an existing Mycroft skill that you'd like to convert to an OVOS skill, you can do so by running the following command in your skill directory:
+
+`projen new ovosskill --from "@mikejgray/ovos-skill-projen" --retrofit`
+
+This will:
+
+- Add the OVOS skill requirements to your `requirements.txt` file, creating one if it does not exist
+- Overwrite your .gitignore file with a standard Python .gitignore plus `node_modules` and `.DS_Store`
+- Create a dev branch, if one does not exist, and commit the changes to it
+- Add all of OVOS' standard GitHub Actions workflows to your `.github/workflows` directory
+- Move files in `ui`, `intent`, `dialog`, etc. directories to `locale`, respecting the language folders within (WIP)
+- Replace Mycroft imports with their OVOS replacements in your `__init__.py` file, assuming it is in the root of the repo
+
+It will not:
+
+- Overwrite your README.md file, if it exists, or create one if it does not exist
+- Create sample code
+- Touch your LICENSE file
+  - Note that official OVOS and Neon skills have skill license requirements that may not be compatible with your existing license, if you want to submit it as part of one of those organizations. Please review the [OVOS skill license requirements](https://openvoiceos.github.io/ovos-technical-manual/license/).
+
+Once the retrofit is complete, you can review the changes needed for modernization with `grep TODO __init__.py`. This project attempts to handle as many as possible, but due to differences in code style and structure, some changes will need to be made manually.
 
 # API Reference <a name="API Reference" id="api-reference"></a>
 
@@ -76,10 +102,12 @@ const oVOSSkillProjectOptions: OVOSSkillProjectOptions = { ... }
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.author">author</a></code> | <code>string</code> | The name of the skill's author. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.authorAddress">authorAddress</a></code> | <code>string</code> | The email address of the skill's author. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.authorHandle">authorHandle</a></code> | <code>string</code> | The GitHub handle of the skill's author. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.condenseLocaleFolders">condenseLocaleFolders</a></code> | <code>boolean</code> | Restructure locale folders to be more OVOS-like? |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.githubWorkflows">githubWorkflows</a></code> | <code>boolean</code> | Add Github Actions workflows? |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.packageDir">packageDir</a></code> | <code>string</code> | The name of the directory containing the skill's code. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.pypiName">pypiName</a></code> | <code>string</code> | The name of the skill's PyPi package. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.repositoryUrl">repositoryUrl</a></code> | <code>string</code> | The URL of the skill's GitHub repository. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.retrofit">retrofit</a></code> | <code>boolean</code> | Retrofit an existing Mycroft skill to OVOS? |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.sampleCode">sampleCode</a></code> | <code>boolean</code> | Include sample code? |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.skillKeywords">skillKeywords</a></code> | <code>string</code> | Keywords for your skill package. |
 
@@ -578,6 +606,19 @@ The GitHub handle of the skill's author.
 ```
 
 
+##### `condenseLocaleFolders`<sup>Optional</sup> <a name="condenseLocaleFolders" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.condenseLocaleFolders"></a>
+
+```typescript
+public readonly condenseLocaleFolders: boolean;
+```
+
+- *Type:* boolean
+- *Default:* true
+
+Restructure locale folders to be more OVOS-like?
+
+---
+
 ##### `githubWorkflows`<sup>Optional</sup> <a name="githubWorkflows" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.githubWorkflows"></a>
 
 ```typescript
@@ -649,6 +690,19 @@ The URL of the skill's GitHub repository.
 "https://github.com/OpenVoiceOS/ovos-hello-world-skill"
 ```
 
+
+##### `retrofit`<sup>Optional</sup> <a name="retrofit" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.retrofit"></a>
+
+```typescript
+public readonly retrofit: boolean;
+```
+
+- *Type:* boolean
+- *Default:* false
+
+Retrofit an existing Mycroft skill to OVOS?
+
+---
 
 ##### `sampleCode`<sup>Optional</sup> <a name="sampleCode" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.sampleCode"></a>
 
@@ -723,6 +777,7 @@ new OVOSSkillProject(options: OVOSSkillProjectOptions)
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createDevBranch">createDevBranch</a></code> | *No description.* |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createGenericSkillCode">createGenericSkillCode</a></code> | *No description.* |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createGithubWorkflows">createGithubWorkflows</a></code> | *No description.* |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.restructureLocaleFolders">restructureLocaleFolders</a></code> | *No description.* |
 
 ---
 
@@ -997,8 +1052,14 @@ public createDevBranch(): void
 ##### `createGenericSkillCode` <a name="createGenericSkillCode" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createGenericSkillCode"></a>
 
 ```typescript
-public createGenericSkillCode(): void
+public createGenericSkillCode(dir?: string): void
 ```
+
+###### `dir`<sup>Optional</sup> <a name="dir" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createGenericSkillCode.parameter.dir"></a>
+
+- *Type:* string
+
+---
 
 ##### `createGithubWorkflows` <a name="createGithubWorkflows" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createGithubWorkflows"></a>
 
@@ -1006,6 +1067,39 @@ public createGenericSkillCode(): void
 public createGithubWorkflows(): void
 ```
 
+##### `restructureLocaleFolders` <a name="restructureLocaleFolders" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.restructureLocaleFolders"></a>
+
+```typescript
+public restructureLocaleFolders(sourceFolder: string): void
+```
+
+###### `sourceFolder`<sup>Required</sup> <a name="sourceFolder" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.restructureLocaleFolders.parameter.sourceFolder"></a>
+
+- *Type:* string
+
+---
+
+#### Static Functions <a name="Static Functions" id="Static Functions"></a>
+
+| **Name** | **Description** |
+| --- | --- |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.modernizeSkillCode">modernizeSkillCode</a></code> | *No description.* |
+
+---
+
+##### `modernizeSkillCode` <a name="modernizeSkillCode" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.modernizeSkillCode"></a>
+
+```typescript
+import { OVOSSkillProject } from '@mikejgray/ovos-skill-projen'
+
+OVOSSkillProject.modernizeSkillCode(file: string)
+```
+
+###### `file`<sup>Required</sup> <a name="file" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.modernizeSkillCode.parameter.file"></a>
+
+- *Type:* string
+
+---
 
 #### Properties <a name="Properties" id="Properties"></a>
 

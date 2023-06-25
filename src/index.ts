@@ -1,5 +1,5 @@
 import { exec } from 'child_process';
-import { readFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { ProjenrcJson, SampleDir, SampleFile } from 'projen';
 import { GitHubProject, GitHubProjectOptions } from 'projen/lib/github';
@@ -64,49 +64,120 @@ export interface OVOSSkillProjectOptions extends GitHubProjectOptions {
    * @example "https://github.com/OpenVoiceOS/ovos-hello-world-skill"
    */
   readonly repositoryUrl?: string;
+  /**
+   * Retrofit an existing Mycroft skill to OVOS?
+   * @default false
+   */
+  readonly retrofit?: boolean;
+  /**
+   * Restructure locale folders to be more OVOS-like?
+   * @default true
+   */
+  readonly condenseLocaleFolders?: boolean;
 }
 
 export class OVOSSkillProject extends GitHubProject {
+  static modernizeSkillCode(file: string) {
+    // Load a file and add imports to the top
+    let existingSkillFileContents = readFileSync(file).toString();
+    const ovosImports = `from ovos_workshop.decorators import intent_handler
+from ovos_workshop.skills import OVOSSkill
+from ovos_utils.intents import IntentBuilder
+from ovos_bus_client.message import Message`;
+    // Replacements
+    let skillFileArray = existingSkillFileContents.split('\n');
+    skillFileArray.forEach((line, index) => {
+      // Comment out Mycroft imports
+      if (line.startsWith('from mycroft')) {
+        skillFileArray[index] = `# TODO: Remove all Mycroft imports\n# ${line}`;
+      }
+      // Best practices for super().__init__
+      if (line.includes('super().__init__') && line.includes('name=')) {
+        skillFileArray[index] = `# TODO: Remove name= parameter from super().__init__
+# TODO: Replace args with *args, **kwargs
+${line}`;
+      }
+      // Deprecated initialize() and create_skill()
+      if (line.includes('def initialize()')) {
+        skillFileArray[index] = `# TODO: Remove initialize() and move to __init__() after the super call\n${line}`;
+      }
+      if (line.includes('def create_skill(')) {
+        skillFileArray[index] = `# TODO: Remove create_skill() function\n${line}`;
+      }
+      // Replace MycroftSkill with OVOSSkill
+      if (line.includes('(MycroftSkill)')) {
+        skillFileArray[index] = line.replace('(MycroftSkill)', '(OVOSSkill)');
+      }
+    });
+    // Overwrite file contents
+    writeFileSync(file, `${ovosImports}\n${skillFileArray.join('\n')}`);
+  }
+
   constructor(options: OVOSSkillProjectOptions) {
+    // Default options
     const author = options.author ?? 'TODO: Your Name';
-    super({
-      readme: {
+    const retrofit = options.retrofit ?? false;
+    const repositoryUrl = options.repositoryUrl ?? 'TODO: PLACEHOLDER';
+    const packageDir = options.packageDir ?? 'src';
+    const pypiName = options.pypiName ?? process.cwd().split('/').pop()!;
+    const authorAddress = options.authorAddress ?? 'TODO: Your Email';
+    const authorHandle = options.authorHandle ?? '';
+    const sampleCode = options.sampleCode ?? true;
+    const skillKeywords = options.skillKeywords ?? 'ovos skill';
+    const condenseLocaleFolders = options.condenseLocaleFolders ?? true;
+
+    // Super
+    let superProps = { ...options };
+    if (!retrofit) {
+      superProps.readme = {
         contents: readmeMd({
           skillClass: options.skillClass,
           authorName: author,
-          authorHandle: options.authorHandle ?? '',
-          skillKeywords: options.skillKeywords ?? 'ovos skill',
+          authorHandle: authorHandle,
+          skillKeywords: skillKeywords,
         }),
-      },
-      ...options,
-    });
+      };
+    };
+    super(superProps);
+
     // projenrc.json
     new ProjenrcJson(this, {});
     // gitignore
     this.gitignore.addPatterns('.DS_Store', 'node_modules');
     this.addPythonGitIgnore();
-    // if (options.condenseLocaleFolders) {
-    // this.restructureLocaleFolders();
-    // };
+    if (condenseLocaleFolders && retrofit) {
+      this.restructureLocaleFolders(packageDir);
+    };
     // Sample skill
-    if (options.sampleCode ?? true) {
-      this.createGenericSkillCode();
+    if (sampleCode && !retrofit) {
+      this.createGenericSkillCode(options.packageDir);
     }
     // Root files
     new SampleFile(this, 'setup.py', {
       contents: setupPy({
-        repositoryUrl: options.repositoryUrl ?? 'TODO: PLACEHOLDER',
-        packageDir: options.packageDir ?? 'src',
-        pypiName: options.pypiName ?? process.cwd().split('/').pop()!,
+        repositoryUrl: repositoryUrl,
+        packageDir: packageDir,
+        pypiName: pypiName,
         author: author,
-        authorAddress: options.authorAddress ?? 'TODO: Your Email',
+        authorAddress: authorAddress,
       }),
     });
     new SampleFile(this, 'skill.json', {
       contents: '{}',
     });
+    let requirements = 'ovos-utils\novos-bus-client\novos-workshop';
+    if (retrofit) {
+      const existingRequirements = readFileSync('requirements.txt').toString();
+      requirements = `${existingRequirements}\n${requirements}`;
+      if (existsSync('__init__.py')) {
+        OVOSSkillProject.modernizeSkillCode('__init__.py');
+      } else {
+        const todoMd = readFileSync('files/TODO.md').toString();
+        writeFileSync('TODO.md', `Could not find __init__.py, please update your skill manually:\n${todoMd}`);
+      }
+    };
     new SampleFile(this, 'requirements.txt', {
-      contents: 'ovos-utils\novos-bus-client\novos-workshop',
+      contents: requirements,
     });
     // Github Actions
     if (options.githubWorkflows ?? true) {
@@ -116,8 +187,8 @@ export class OVOSSkillProject extends GitHubProject {
   }
 
   // Methods
-  createGenericSkillCode() {
-    new SampleDir(this, 'src', {
+  createGenericSkillCode(dir?: string) {
+    new SampleDir(this, dir ?? 'src', {
       files: {
         '__init__.py': readFileSync(join(__dirname, 'files', '__init__.py')).toString(),
         'version.py': 'VERSION_MAJOR = 0\nVERSION_MINOR = 0\nVERSION_BUILD = 1\nVERSION_ALPHA = 0',
@@ -268,38 +339,6 @@ export class OVOSSkillProject extends GitHubProject {
     new SkillTestsWorkflow(this.github!);
     new UpdateSkillJsonWorkflow(this.github!);
   }
-
-  // Retrofitting methods
-  // restructureLocaleFolders() { // TODO: Handle localization, this structure is wrong
-  //   ['ui', 'vocab', 'dialog', 'regex', 'intents'].forEach((dir) => {
-  //     try {
-  //       if (!existsSync('src/locale')) {
-  //         mkdirSync('src/locale');
-  //       }
-  //       // For each language code directory in ${dir}, rename it to `src/locale/${language_code}/${dir}`
-  //       // TODO: The next line is wrong
-  //       renameSync(dir, `src/locale/${dir}`);
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   });
-  // }
-
-  // addImports(file: File) {
-  //   // Load a file and add imports to the top
-  //   // from ovos_workshop.decorators import intent_handler
-  //   // from ovos_workshop.skills import OVOSSkill
-  //   // from ovos_utils.intents import IntentBuilder
-  //   // from ovos_bus_client.message import Message ?
-  //   const existingSkillFileContents = readSync(openSync(file, 'r')); // TODO:
-  //   // Add imports to the top
-  //   // Add TODO: comment to the top saying to remove old MycroftSkill imports
-  //   // Add TODO: comment to the top saying to replace intent_handler with intent_file_handler
-  //   // Don't pass `name=...` parameter to super()
-  //   // For super init, use `*args, **kwargs`
-  //   // Overwrite file contents
-  // }
-
   createDevBranch() {
     exec('git rev-parse --verify dev', (err) => {
       if (err) {
@@ -307,4 +346,30 @@ export class OVOSSkillProject extends GitHubProject {
       }
     });
   }
+  restructureLocaleFolders(sourceFolder: string) {
+    ['vocab', 'dialog', 'regex', 'intents'].forEach((dir) => {
+      try {
+        const languageDirs = readdirSync(`${sourceFolder}/${dir}`, { withFileTypes: true })
+          .filter(dirent => dirent.isDirectory())
+          .map(dirent => dirent.name);
+
+        languageDirs.forEach((lang) => {
+          if (!existsSync(`${sourceFolder}/locale/${lang}`)) {
+            mkdirSync(`${sourceFolder}/locale/${lang}`, { recursive: true });
+          }
+
+          // Check if a directory already exists at the new path
+          if (existsSync(`${sourceFolder}/locale/${lang}/${dir}`)) {
+            console.warn(`Directory already exists: ${sourceFolder}/locale/${lang}/${dir}. Skipping...`);
+          } else {
+            renameSync(`${sourceFolder}/${dir}/${lang}`, `${sourceFolder}/locale/${lang}/${dir}`);
+          }
+        });
+
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  }
+
 }

@@ -11,8 +11,7 @@ export const readmeMd = ({
   authorHandle,
   skillKeywords,
 }: readmeInterface): string => {
-  return `
-# ${skillClass}
+  return `# ${skillClass}
 
 Introductory Skill so that Skill Authors can see how an OVOS Skill is put together
 
@@ -28,7 +27,7 @@ Information about your skill
 
 ## Credits
 
-${authorName} (@${authorHandle}})
+${authorName} (@${authorHandle})
 
 ## Category
 

@@ -414,8 +414,7 @@ cython_debug/
       },
     },
   },
-  "README.md": "
-# TestSkill
+  "README.md": "# TestSkill
 
 Introductory Skill so that Skill Authors can see how an OVOS Skill is put together
 
@@ -431,7 +430,7 @@ Information about your skill
 
 ## Credits
 
-TODO: Your Name (@})
+TODO: Your Name (@)
 
 ## Category
 
