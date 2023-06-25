@@ -24,9 +24,35 @@ In a new directory, run:
 
 `projen new ovosskill --from "@mikejgray/ovos-skill-projen"`
 
-You can also pass flags for supported projen options, such as `--author` and `--authorAddress`. For a full list of supported options, see [`API.md`](API.md)
+After the skill has been created with default options, a file called `.projenrc.json` will be generated. This file contains all of the options used to create the skill, and can be edited to change the skill's configuration. For a full list of supported options, see [`API.md`](API.md).
 
-## Retrofitting Mycroft skills
+Most commonly, you will want to change the `name`, `author`, `authorAddress`, `authorHandle`, and `repositoryUrl` options. If you prefer to have an explicitly named directory for your source code instead of the default `src`, then `packageDir` should also be set. The `type` option should be left alone, as it is used to tell projen which project template to use.
+
+Example:
+
+```json
+{
+  "type": "@mikejgray/ovos-skill-projen.OVOSSkillProject",
+  "name": "test-skill",
+  "author": "Mike Gray",
+  "authorAddress": "mike@graywind.org",
+  "authorHandle": "mikejgray",
+  "repositoryUrl": "https://github.com/mikejgray/test-skill",
+  "packageDir": "test_skill"
+}
+```
+
+After editing `.projenrc.json`, run `pj` to regenerate the project files. This can automatically keep your project up to date with the latest changes, including managing your `setup.py` file.
+
+### setup.py ownership
+
+Note that projen takes ownership of the `setup.py` file, and the expectation is that manual edits are not allowed. If you need to make changes to the `setup.py` file, you should do so by editing `.projenrc.json` and running `pj` to regenerate the file.
+
+### Taking manual ownership of the repository
+
+If you prefer not to keep the skill repository under projen's management, simply delete `node_modules`, `.projenrc.json`, `.gitattributes`, `.projen`, and `package.json` from the skill directory. You can also delete `.github/workflows` if you do not want to use GitHub Actions automation workflows.
+
+## Retrofitting Mycroft skills (WIP)
 
 If you have an existing Mycroft skill that you'd like to convert to an OVOS skill, you can do so by running the following command in your skill directory:
 
@@ -773,11 +799,11 @@ new OVOSSkillProject(options: OVOSSkillProjectOptions)
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindJsonFile">tryFindJsonFile</a></code> | Finds a json file by name. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindObjectFile">tryFindObjectFile</a></code> | Finds an object file (like JsonFile, YamlFile, etc.) by name. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.tryRemoveFile">tryRemoveFile</a></code> | Finds a file at the specified relative path within this project and removes it. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.addPythonGitIgnore">addPythonGitIgnore</a></code> | *No description.* |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createDevBranch">createDevBranch</a></code> | *No description.* |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createGenericSkillCode">createGenericSkillCode</a></code> | *No description.* |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createGithubWorkflows">createGithubWorkflows</a></code> | *No description.* |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.restructureLocaleFolders">restructureLocaleFolders</a></code> | *No description.* |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.addPythonGitIgnore">addPythonGitIgnore</a></code> | Add a Python .gitignore file. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createDevBranch">createDevBranch</a></code> | Create a dev branch if it doesn't already exist, and set it as the default branch. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createGenericSkillCode">createGenericSkillCode</a></code> | Create a generic skill with sample code. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createGithubWorkflows">createGithubWorkflows</a></code> | Create OVOS standard Github Actions workflows. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.restructureLocaleFolders">restructureLocaleFolders</a></code> | Restructure locale folders to be more OVOS-like. |
 
 ---
 
@@ -1043,11 +1069,15 @@ resolved from the root of _this_ project.
 public addPythonGitIgnore(): void
 ```
 
+Add a Python .gitignore file.
+
 ##### `createDevBranch` <a name="createDevBranch" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createDevBranch"></a>
 
 ```typescript
 public createDevBranch(): void
 ```
+
+Create a dev branch if it doesn't already exist, and set it as the default branch.
 
 ##### `createGenericSkillCode` <a name="createGenericSkillCode" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createGenericSkillCode"></a>
 
@@ -1055,9 +1085,20 @@ public createDevBranch(): void
 public createGenericSkillCode(dir?: string): void
 ```
 
+Create a generic skill with sample code.
+
+*Example*
+
+```typescript
+"hello_world_skill"
+```
+
+
 ###### `dir`<sup>Optional</sup> <a name="dir" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createGenericSkillCode.parameter.dir"></a>
 
 - *Type:* string
+
+The name of the directory to create sample code in.
 
 ---
 
@@ -1067,15 +1108,21 @@ public createGenericSkillCode(dir?: string): void
 public createGithubWorkflows(): void
 ```
 
+Create OVOS standard Github Actions workflows.
+
 ##### `restructureLocaleFolders` <a name="restructureLocaleFolders" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.restructureLocaleFolders"></a>
 
 ```typescript
 public restructureLocaleFolders(sourceFolder: string): void
 ```
 
+Restructure locale folders to be more OVOS-like.
+
 ###### `sourceFolder`<sup>Required</sup> <a name="sourceFolder" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.restructureLocaleFolders.parameter.sourceFolder"></a>
 
 - *Type:* string
+
+The name of the directory containing the Mycroft skill's code.
 
 ---
 
@@ -1083,7 +1130,7 @@ public restructureLocaleFolders(sourceFolder: string): void
 
 | **Name** | **Description** |
 | --- | --- |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.modernizeSkillCode">modernizeSkillCode</a></code> | *No description.* |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.modernizeSkillCode">modernizeSkillCode</a></code> | Load a Mycroft skill Python file and modernize it for OVOS. |
 
 ---
 
@@ -1095,9 +1142,13 @@ import { OVOSSkillProject } from '@mikejgray/ovos-skill-projen'
 OVOSSkillProject.modernizeSkillCode(file: string)
 ```
 
+Load a Mycroft skill Python file and modernize it for OVOS.
+
 ###### `file`<sup>Required</sup> <a name="file" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.modernizeSkillCode.parameter.file"></a>
 
 - *Type:* string
+
+The file to modernize.
 
 ---
 

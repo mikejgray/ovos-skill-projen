@@ -1,7 +1,7 @@
 import { exec } from 'child_process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { ProjenrcJson, SampleDir, SampleFile } from 'projen';
+import { ProjenrcJson, SampleDir, SampleFile, TextFile } from 'projen';
 import { GitHubProject, GitHubProjectOptions } from 'projen/lib/github';
 import { readmeMd } from './files/README.md';
 import { setupPy } from './files/setup.py';
@@ -77,8 +77,11 @@ export interface OVOSSkillProjectOptions extends GitHubProjectOptions {
 }
 
 export class OVOSSkillProject extends GitHubProject {
+  /**
+   * Load a Mycroft skill Python file and modernize it for OVOS.
+   * @param file The file to modernize
+   */
   static modernizeSkillCode(file: string) {
-    // Load a file and add imports to the top
     let existingSkillFileContents = readFileSync(file).toString();
     const ovosImports = `from ovos_workshop.decorators import intent_handler
 from ovos_workshop.skills import OVOSSkill
@@ -153,14 +156,14 @@ ${line}`;
       this.createGenericSkillCode(options.packageDir);
     }
     // Root files
-    new SampleFile(this, 'setup.py', {
-      contents: setupPy({
+    new TextFile(this, 'setup.py', {
+      lines: setupPy({
         repositoryUrl: repositoryUrl,
         packageDir: packageDir,
         pypiName: pypiName,
         author: author,
         authorAddress: authorAddress,
-      }),
+      }).split('\n'),
     });
     new SampleFile(this, 'skill.json', {
       contents: '{}',
@@ -176,8 +179,8 @@ ${line}`;
         writeFileSync('TODO.md', `Could not find __init__.py, please update your skill manually:\n${todoMd}`);
       }
     };
-    new SampleFile(this, 'requirements.txt', {
-      contents: requirements,
+    new TextFile(this, 'requirements.txt', {
+      lines: requirements.split('\n'),
     });
     // Github Actions
     if (options.githubWorkflows ?? true) {
@@ -187,6 +190,12 @@ ${line}`;
   }
 
   // Methods
+  /**
+   * Create a generic skill with sample code.
+   * @param dir The name of the directory to create sample code in
+   * @default "src"
+   * @example "hello_world_skill"
+   */
   createGenericSkillCode(dir?: string) {
     new SampleDir(this, dir ?? 'src', {
       files: {
@@ -201,6 +210,9 @@ ${line}`;
       },
     });
   }
+  /**
+   * Add a Python .gitignore file.
+   */
   addPythonGitIgnore() {
     this.gitignore.exclude(
       '# Byte-compiled / optimized / DLL files',
@@ -331,6 +343,9 @@ ${line}`;
       'cython_debug/',
     );
   }
+  /**
+   * Create OVOS standard Github Actions workflows.
+   */
   createGithubWorkflows() {
     new LicenseTestsWorkflow(this.github!);
     new ProposeReleaseWorkflow(this.github!);
@@ -339,13 +354,21 @@ ${line}`;
     new SkillTestsWorkflow(this.github!);
     new UpdateSkillJsonWorkflow(this.github!);
   }
+  /**
+   * Create a dev branch if it doesn't already exist, and set it as the default branch.
+   */
   createDevBranch() {
     exec('git rev-parse --verify dev', (err) => {
       if (err) {
         exec('git checkout -b dev');
+        exec('git branch -M dev');
       }
     });
   }
+  /**
+   * Restructure locale folders to be more OVOS-like.
+   * @param sourceFolder The name of the directory containing the Mycroft skill's code.
+   */
   restructureLocaleFolders(sourceFolder: string) {
     ['vocab', 'dialog', 'regex', 'intents'].forEach((dir) => {
       try {

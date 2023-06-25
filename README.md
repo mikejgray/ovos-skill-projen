@@ -24,9 +24,35 @@ In a new directory, run:
 
 `projen new ovosskill --from "@mikejgray/ovos-skill-projen"`
 
-You can also pass flags for supported projen options, such as `--author` and `--authorAddress`. For a full list of supported options, see [`API.md`](API.md)
+After the skill has been created with default options, a file called `.projenrc.json` will be generated. This file contains all of the options used to create the skill, and can be edited to change the skill's configuration. For a full list of supported options, see [`API.md`](API.md).
 
-## Retrofitting Mycroft skills
+Most commonly, you will want to change the `name`, `author`, `authorAddress`, `authorHandle`, and `repositoryUrl` options. If you prefer to have an explicitly named directory for your source code instead of the default `src`, then `packageDir` should also be set. The `type` option should be left alone, as it is used to tell projen which project template to use.
+
+Example:
+
+```json
+{
+  "type": "@mikejgray/ovos-skill-projen.OVOSSkillProject",
+  "name": "test-skill",
+  "author": "Mike Gray",
+  "authorAddress": "mike@graywind.org",
+  "authorHandle": "mikejgray",
+  "repositoryUrl": "https://github.com/mikejgray/test-skill",
+  "packageDir": "test_skill"
+}
+```
+
+After editing `.projenrc.json`, run `pj` to regenerate the project files. This can automatically keep your project up to date with the latest changes, including managing your `setup.py` file.
+
+### setup.py ownership
+
+Note that projen takes ownership of the `setup.py` file, and the expectation is that manual edits are not allowed. If you need to make changes to the `setup.py` file, you should do so by editing `.projenrc.json` and running `pj` to regenerate the file.
+
+### Taking manual ownership of the repository
+
+If you prefer not to keep the skill repository under projen's management, simply delete `node_modules`, `.projenrc.json`, `.gitattributes`, `.projen`, and `package.json` from the skill directory. You can also delete `.github/workflows` if you do not want to use GitHub Actions automation workflows.
+
+## Retrofitting Mycroft skills (WIP)
 
 If you have an existing Mycroft skill that you'd like to convert to an OVOS skill, you can do so by running the following command in your skill directory:
 
