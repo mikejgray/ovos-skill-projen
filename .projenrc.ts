@@ -29,4 +29,10 @@ project.compileTask.exec(
   'cp src/files/* lib/files',
 );
 
+const upgradeMain = project.tryFindObjectFile('.github/workflows/upgrade-main.yml');
+upgradeMain?.addOverride('jobs.pr.steps.4.with.token', '${{ secrets.GITHUB_TOKEN }}');
+upgradeMain?.addOverride('jobs.pr.permissions.pull-requests', 'write');
+upgradeMain?.addOverride('jobs.pr.permissions.contents', 'write');
+
+
 project.synth();

@@ -38,7 +38,8 @@ jobs:
     needs: upgrade
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
+      pull-requests: write
     if: ${{ needs.upgrade.outputs.patch_created }}
     steps:
       - name: Checkout

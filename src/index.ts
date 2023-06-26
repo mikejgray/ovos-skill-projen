@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFile
 import { join } from 'path';
 import { ProjenrcJson, SampleDir, SampleFile, TextFile } from 'projen';
 import { GitHubProject, GitHubProjectOptions } from 'projen/lib/github';
-import { readmeMd } from './files/README.md';
+import { readmeMd } from './files/README';
 import { setupPy } from './files/setup.py';
 import { LicenseTestsWorkflow, ProposeReleaseWorkflow, PublishAlphaWorkflow, PublishReleaseWorkflow, SkillTestsWorkflow, UpdateSkillJsonWorkflow } from './GithubWorkflows';
 
@@ -17,7 +17,7 @@ export interface OVOSSkillProjectOptions extends GitHubProjectOptions {
    * The name of the skill class
    * @example HelloWorldSkill
    */
-  readonly skillClass: string;
+  readonly skillClass?: string;
   /**
    * The name of the skill's PyPi package
    * @example ovos-hello-world-skill
@@ -86,6 +86,11 @@ export interface OVOSSkillProjectOptions extends GitHubProjectOptions {
    * @example "A simple skill that says hello world"
    */
   readonly skillDescription?: string;
+  /**
+   * Include a test to check that the skill's license is FOSS?
+   * @default true
+   */
+  readonly skillLicenseTest?: boolean;
 }
 
 export class OVOSSkillProject extends GitHubProject {
@@ -95,11 +100,15 @@ export class OVOSSkillProject extends GitHubProject {
    */
   static modernizeSkillCode(file: string) {
     let existingSkillFileContents = readFileSync(file).toString();
-    const ovosImports = `from ovos_workshop.decorators import intent_handler
+    let ovosImports = `# TODO: Remove unused OVOS imports
+from ovos_workshop.decorators import intent_handler
 from ovos_workshop.skills import OVOSSkill
 from ovos_utils.intents import IntentBuilder
 from ovos_bus_client.message import Message`;
     // Replacements
+    if (existingSkillFileContents.includes('AdaptIntent')) {
+      ovosImports += '\nfrom ovos_utils.intents import AdaptIntent';
+    }
     let skillFileArray = existingSkillFileContents.split('\n');
     skillFileArray.forEach((line, index) => {
       // Comment out Mycroft imports
@@ -130,28 +139,30 @@ ${line}`;
 
   constructor(options: OVOSSkillProjectOptions) {
     // Default options
-    const author = options.author ?? 'TODO: Your Name';
+    const author = options.author ?? 'TODO: Add \'author\' to .projenrc.json and run pj';
+    const repositoryUrl = options.repositoryUrl ?? 'TODO: Add \'repositoryUrl\' to .projenrc.json and run pj';
+    const authorAddress = options.authorAddress ?? 'TODO: Add \'authorAddress\' to .projenrc.json and run pj';
+    const license = options.license ?? '# TODO: Add \'license\' to .projenrc.json and run pj';
+    const skillClass = options.skillClass ?? 'TODO: Add \'skillClass\' to .projenrc.json and run pj';
     const retrofit = options.retrofit ?? false;
-    const repositoryUrl = options.repositoryUrl ?? 'TODO: PLACEHOLDER';
-    const packageDir = options.packageDir ?? 'src';
     const pypiName = options.pypiName ?? process.cwd().split('/').pop()!;
-    const authorAddress = options.authorAddress ?? 'TODO: Your Email';
-    const authorHandle = options.authorHandle ?? '';
     const sampleCode = options.sampleCode ?? true;
     const skillKeywords = options.skillKeywords ?? 'ovos skill';
     const condenseLocaleFolders = options.condenseLocaleFolders ?? true;
     const githubworkflows = options.githubWorkflows ?? true;
-    const license = options.license ?? 'Apache-2.0';
     const skillDescription = options.skillDescription ?? '';
+    const skillLicenseTest = options.skillLicenseTest ?? true;
+    let packageDir = options.packageDir ?? 'src';
+    if (retrofit && packageDir === 'src') { packageDir = '';}
 
     // Super
     let superProps = { ...options };
     if (!retrofit) {
       superProps.readme = {
         contents: readmeMd({
-          skillClass: options.skillClass,
-          authorName: author,
-          authorHandle: authorHandle,
+          skillClass: options.skillClass ?? 'OVOSSkill',
+          authorName: options.author ?? 'authorName',
+          authorHandle: options.authorHandle ?? 'githubUsername',
           skillKeywords: skillKeywords,
         }),
       };
@@ -180,7 +191,7 @@ ${line}`;
         authorAddress: authorAddress,
         license: license,
         description: skillDescription,
-        skillClass: options.skillClass,
+        skillClass: skillClass,
       }).split('\n'),
     });
     new SampleFile(this, 'skill.json', {
@@ -196,16 +207,16 @@ ${line}`;
           lines: requirements.split('\n'),
         });
       }
-      if (existsSync('__init__.py')) {
+      if (existsSync('__init__.py') && !existsSync('setup.py')) {
         OVOSSkillProject.modernizeSkillCode('__init__.py');
-      } else {
-        const todoMd = readFileSync('files/TODO.md').toString();
+      } else if (!existsSync('__init__.py') && !existsSync('setup.py')) {
+        const todoMd = readFileSync(join(__dirname, 'files', 'TODO.md')).toString();
         writeFileSync('TODO.md', `Could not find __init__.py, please update your skill manually:\n${todoMd}`);
       }
     };
     // Github Actions
     if (githubworkflows) {
-      this.createGithubWorkflows();
+      this.createGithubWorkflows(skillLicenseTest);
     }
     this.createDevBranch();
   }
@@ -367,8 +378,10 @@ ${line}`;
   /**
    * Create OVOS standard Github Actions workflows.
    */
-  createGithubWorkflows() {
-    new LicenseTestsWorkflow(this.github!);
+  createGithubWorkflows(skillLicenseTest: boolean) {
+    if (skillLicenseTest) {
+      new LicenseTestsWorkflow(this.github!);
+    }
     new ProposeReleaseWorkflow(this.github!);
     new PublishAlphaWorkflow(this.github!);
     new PublishReleaseWorkflow(this.github!);
@@ -392,26 +405,28 @@ ${line}`;
    */
   restructureLocaleFolders(sourceFolder: string) {
     ['vocab', 'dialog', 'regex', 'intents'].forEach((dir) => {
+      const locale = join(sourceFolder, 'locale');
       try {
-        const languageDirs = readdirSync(`${sourceFolder}/${dir}`, { withFileTypes: true })
+        mkdirSync(locale, { recursive: true });
+        const languageDirs = readdirSync(join(sourceFolder, dir), { withFileTypes: true })
           .filter(dirent => dirent.isDirectory())
           .map(dirent => dirent.name);
 
         languageDirs.forEach((lang) => {
-          if (!existsSync(`${sourceFolder}/locale/${lang}`)) {
-            mkdirSync(`${sourceFolder}/locale/${lang}`, { recursive: true });
+          if (!existsSync(join(locale, lang))) {
+            mkdirSync(join(locale, lang), { recursive: true });
           }
 
           // Check if a directory already exists at the new path
-          if (existsSync(`${sourceFolder}/locale/${lang}/${dir}`)) {
-            console.warn(`Directory already exists: ${sourceFolder}/locale/${lang}/${dir}. Skipping...`);
+          if (existsSync(join(locale, lang, dir))) {
+            console.warn(`Directory already exists: ${join(locale, lang, dir)}. Skipping...`);
           } else {
-            renameSync(`${sourceFolder}/${dir}/${lang}`, `${sourceFolder}/locale/${lang}/${dir}`);
+            renameSync(join(sourceFolder, dir, lang), join(locale, lang, dir));
           }
         });
 
       } catch (err) {
-        console.error(err);
+        console.debug(err);
       }
     });
   }

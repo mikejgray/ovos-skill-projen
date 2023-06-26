@@ -73,6 +73,8 @@ It will not:
 - Overwrite your README.md file, if it exists, or create one if it does not exist
 - Create sample code
 - Touch your LICENSE file
-  - Note that official OVOS and Neon skills have skill license requirements that may not be compatible with your existing license, if you want to submit it as part of one of those organizations. Please review the [OVOS skill license requirements](https://openvoiceos.github.io/ovos-technical-manual/license/).
+  - Note that official OVOS and Neon skills have skill license requirements that may not be compatible with your existing license, if you want to submit it as part of one of those organizations. Please review the [OVOS skill license requirements](https://openvoiceos.github.io/ovos-technical-manual/license/). If you are not submitting your skill to OVOS or Neon, you can use any license you like, and should set `skillLicenseTest: false` in your `.projenrc.json` file.
 
 Once the retrofit is complete, you can review the changes needed for modernization with `grep TODO __init__.py`. This project attempts to handle as many as possible, but due to differences in code style and structure, some changes will need to be made manually.
+
+If your skill code is not in `__init__.py` in the repository root, the retrofit code won't be able to find it. PRs welcome to add support for other skill structures.

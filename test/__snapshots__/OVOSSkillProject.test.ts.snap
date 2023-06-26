@@ -433,7 +433,7 @@ Information about your skill
 
 ## Credits
 
-TODO: Your Name (@)
+authorName (@githubUsername)
 
 ## Category
 
@@ -448,7 +448,7 @@ from setuptools import setup
 from os import walk, path
 
 BASEDIR = path.abspath(path.dirname(__file__))
-URL = \\"TODO: PLACEHOLDER\\"
+URL = \\"TODO: Add 'repositoryUrl' to .projenrc.json and run pj\\"
 SKILL_CLAZZ = \\"TestSkill\\"  # needs to match __init__.py class name
 PYPI_NAME = \\"test-skill\\"  # pip install PYPI_NAME
 
@@ -513,9 +513,9 @@ setup(
     long_description=long_description,
     long_description_content_type=\\"text/markdown\\",
     url=URL,
-    author=\\"TODO: Your Name\\",
-    author_email=\\"TODO: Your Email\\",
-    license=\\"Apache-2.0\\",
+    author=\\"TODO: Add 'author' to .projenrc.json and run pj\\",
+    author_email=\\"TODO: Add 'authorAddress' to .projenrc.json and run pj\\",
+    license=\\"# TODO: Add 'license' to .projenrc.json and run pj\\",
     package_dir={SKILL_PKG: \\"\\"},
     package_data={SKILL_PKG: find_resource_files()},
     packages=[SKILL_PKG],

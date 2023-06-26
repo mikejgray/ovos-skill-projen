@@ -73,9 +73,11 @@ It will not:
 - Overwrite your README.md file, if it exists, or create one if it does not exist
 - Create sample code
 - Touch your LICENSE file
-  - Note that official OVOS and Neon skills have skill license requirements that may not be compatible with your existing license, if you want to submit it as part of one of those organizations. Please review the [OVOS skill license requirements](https://openvoiceos.github.io/ovos-technical-manual/license/).
+  - Note that official OVOS and Neon skills have skill license requirements that may not be compatible with your existing license, if you want to submit it as part of one of those organizations. Please review the [OVOS skill license requirements](https://openvoiceos.github.io/ovos-technical-manual/license/). If you are not submitting your skill to OVOS or Neon, you can use any license you like, and should set `skillLicenseTest: false` in your `.projenrc.json` file.
 
 Once the retrofit is complete, you can review the changes needed for modernization with `grep TODO __init__.py`. This project attempts to handle as many as possible, but due to differences in code style and structure, some changes will need to be made manually.
+
+If your skill code is not in `__init__.py` in the repository root, the retrofit code won't be able to find it. PRs welcome to add support for other skill structures.
 
 # API Reference <a name="API Reference" id="api-reference"></a>
 
@@ -125,7 +127,6 @@ const oVOSSkillProjectOptions: OVOSSkillProjectOptions = { ... }
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.stale">stale</a></code> | <code>boolean</code> | Auto-close of stale issues and pull request. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.staleOptions">staleOptions</a></code> | <code>projen.github.StaleOptions</code> | Auto-close stale issues and pull requests. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.vscode">vscode</a></code> | <code>boolean</code> | Enable VSCode integration. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.skillClass">skillClass</a></code> | <code>string</code> | The name of the skill class. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.author">author</a></code> | <code>string</code> | The name of the skill's author. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.authorAddress">authorAddress</a></code> | <code>string</code> | The email address of the skill's author. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.authorHandle">authorHandle</a></code> | <code>string</code> | The GitHub handle of the skill's author. |
@@ -137,8 +138,10 @@ const oVOSSkillProjectOptions: OVOSSkillProjectOptions = { ... }
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.repositoryUrl">repositoryUrl</a></code> | <code>string</code> | The URL of the skill's GitHub repository. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.retrofit">retrofit</a></code> | <code>boolean</code> | Retrofit an existing Mycroft skill to OVOS? |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.sampleCode">sampleCode</a></code> | <code>boolean</code> | Include sample code? |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.skillClass">skillClass</a></code> | <code>string</code> | The name of the skill class. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.skillDescription">skillDescription</a></code> | <code>string</code> | The description of the skill. |
 | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.skillKeywords">skillKeywords</a></code> | <code>string</code> | Keywords for your skill package. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.skillLicenseTest">skillLicenseTest</a></code> | <code>boolean</code> | Include a test to check that the skill's license is FOSS? |
 
 ---
 
@@ -556,25 +559,6 @@ Enabled by default for root projects. Disabled for non-root projects.
 
 ---
 
-##### `skillClass`<sup>Required</sup> <a name="skillClass" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.skillClass"></a>
-
-```typescript
-public readonly skillClass: string;
-```
-
-- *Type:* string
-
-The name of the skill class.
-
----
-
-*Example*
-
-```typescript
-HelloWorldSkill
-```
-
-
 ##### `author`<sup>Optional</sup> <a name="author" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.author"></a>
 
 ```typescript
@@ -766,6 +750,25 @@ Include sample code?
 
 ---
 
+##### `skillClass`<sup>Optional</sup> <a name="skillClass" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.skillClass"></a>
+
+```typescript
+public readonly skillClass: string;
+```
+
+- *Type:* string
+
+The name of the skill class.
+
+---
+
+*Example*
+
+```typescript
+HelloWorldSkill
+```
+
+
 ##### `skillDescription`<sup>Optional</sup> <a name="skillDescription" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.skillDescription"></a>
 
 ```typescript
@@ -798,6 +801,19 @@ public readonly skillKeywords: string;
 - *Default:* "ovos skill plugin"
 
 Keywords for your skill package.
+
+---
+
+##### `skillLicenseTest`<sup>Optional</sup> <a name="skillLicenseTest" id="@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions.property.skillLicenseTest"></a>
+
+```typescript
+public readonly skillLicenseTest: boolean;
+```
+
+- *Type:* boolean
+- *Default:* true
+
+Include a test to check that the skill's license is FOSS?
 
 ---
 
@@ -1150,10 +1166,16 @@ The name of the directory to create sample code in.
 ##### `createGithubWorkflows` <a name="createGithubWorkflows" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createGithubWorkflows"></a>
 
 ```typescript
-public createGithubWorkflows(): void
+public createGithubWorkflows(skillLicenseTest: boolean): void
 ```
 
 Create OVOS standard Github Actions workflows.
+
+###### `skillLicenseTest`<sup>Required</sup> <a name="skillLicenseTest" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createGithubWorkflows.parameter.skillLicenseTest"></a>
+
+- *Type:* boolean
+
+---
 
 ##### `restructureLocaleFolders` <a name="restructureLocaleFolders" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.restructureLocaleFolders"></a>
 
