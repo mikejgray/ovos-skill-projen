@@ -24,6 +24,8 @@ In a new directory, run:
 
 `projen new ovosskill --from "@mikejgray/ovos-skill-projen"`
 
+**NOTE**: This repo is not yet available on NPM. Please add the following to your `~/.npmrc` file (create one if it doesn't exist): `@mikejgray:registry=https://npm.pkg.github.com`
+
 After the skill has been created with default options, a file called `.projenrc.json` will be generated. This file contains all of the options used to create the skill, and can be edited to change the skill's configuration. For a full list of supported options, see [`API.md`](API.md).
 
 Most commonly, you will want to change the `name`, `author`, `authorAddress`, `authorHandle`, `skillClass`, and `repositoryUrl` options. If you prefer to have an explicitly named directory for your source code instead of the default `src`, then `packageDir` should also be set. The `type` option should be left alone, as it is used to tell projen which project template to use.
