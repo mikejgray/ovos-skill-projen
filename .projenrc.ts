@@ -22,7 +22,8 @@ const project = new cdk.JsiiProject({
   githubOptions: { mergify: false },
   license: 'Apache-2.0',
 
-  deps: ['projen', 'yaml'],
+  deps: ['projen'],
+  bundledDeps: ['yaml'],
   devDeps: ['jsii-rosetta@~5.0.7'],
   description: 'A projen project for creating OVOS skills, or retrofitting Mycroft skills to OVOS',
 });
