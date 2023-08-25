@@ -410,6 +410,14 @@ ${line}`;
    */
   restructureLocaleFolders(sourceFolder: string) {
     ['vocab', 'dialog', 'regex', 'intents'].forEach((dir) => {
+      const dirPath = join(sourceFolder, dir);
+
+      // Check if the directory exists before proceeding
+      if (!existsSync(dirPath)) {
+        console.warn(`${dir} folder not found in original skill; skipping.`);
+        return; // Continue to the next iteration of the loop
+      }
+
       const locale = join(sourceFolder, 'locale');
       try {
         mkdirSync(locale, { recursive: true });
@@ -429,9 +437,8 @@ ${line}`;
             renameSync(join(sourceFolder, dir, lang), join(locale, lang, dir));
           }
         });
-
       } catch (err) {
-        console.debug(err);
+        console.error(err);
       }
     });
   }
