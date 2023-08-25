@@ -197,16 +197,16 @@ ${line}`;
     new SampleFile(this, 'skill.json', {
       contents: '{}',
     });
-    let requirements = 'ovos-utils\novos-bus-client\novos-workshop';
+    let requirements = 'ovos-utils\novos-bus-client\novos-workshop\n# Your requirements here\n';
+    if (existsSync('requirements.txt')) {
+      const existingRequirements = readFileSync('requirements.txt').toString();
+      requirements = `${existingRequirements}\n${requirements}`;
+    } else {
+      new TextFile(this, 'requirements.txt', {
+        lines: requirements.split('\n'),
+      });
+    }
     if (retrofit) {
-      if (existsSync('requirements.txt')) {
-        const existingRequirements = readFileSync('requirements.txt').toString();
-        requirements = `${existingRequirements}\n${requirements}`;
-      } else {
-        new TextFile(this, 'requirements.txt', {
-          lines: requirements.split('\n'),
-        });
-      }
       if (existsSync('__init__.py') && !existsSync('setup.py')) {
         OVOSSkillProject.modernizeSkillCode('__init__.py');
       } else if (!existsSync('__init__.py') && !existsSync('setup.py')) {
