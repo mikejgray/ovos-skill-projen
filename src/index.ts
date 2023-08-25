@@ -206,6 +206,11 @@ ${line}`;
         lines: requirements.split('\n'),
       });
     }
+    if (!existsSync('version.py') && retrofit) {
+      new TextFile(this, 'version.py', {
+        lines: 'VERSION_MAJOR = 0\nVERSION_MINOR = 0\nVERSION_BUILD = 1\nVERSION_ALPHA = 0'.split('\n'),
+      });
+    };
     if (retrofit) {
       if (existsSync('__init__.py') && !existsSync('setup.py')) {
         OVOSSkillProject.modernizeSkillCode('__init__.py');
