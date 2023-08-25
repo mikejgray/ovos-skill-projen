@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFile
 import { join } from 'path';
 import { ProjenrcJson, SampleDir, SampleFile, TextFile } from 'projen';
 import { GitHubProject, GitHubProjectOptions } from 'projen/lib/github';
+import { parse } from 'yaml';
 import { readmeMd } from './files/README';
 import { setupPy } from './files/setup.py';
 import { LicenseTestsWorkflow, ProposeReleaseWorkflow, PublishAlphaWorkflow, PublishReleaseWorkflow, SkillTestsWorkflow, UpdateSkillJsonWorkflow } from './GithubWorkflows';
@@ -198,12 +199,22 @@ ${line}`;
       contents: '{}',
     });
     let requirements = 'ovos-utils\novos-bus-client\novos-workshop\n# Your requirements here\n';
+    let manifestReqs = '';
+    if (existsSync('manifest.yml')) {
+      // Load and parse YAML file
+      console.debug('Found manifest.yml, trying to extract Python dependencies');
+      const manifest = readFileSync('manifest.yml').toString();
+      const manifestObject = parse(manifest);
+      if (manifestObject.dependencies.python) {
+        manifestReqs = manifestObject.dependencies.python.join('\n') + '\n';
+      }
+    }
     if (existsSync('requirements.txt')) {
       const existingRequirements = readFileSync('requirements.txt').toString();
-      requirements = `${existingRequirements}\n${requirements}`;
+      requirements = `${existingRequirements}\n${manifestReqs ?? ''}${requirements}`;
     } else {
       new TextFile(this, 'requirements.txt', {
-        lines: requirements.split('\n'),
+        lines: [...requirements.split('\n'), ...manifestReqs.split('\n')],
       });
     }
     if (!existsSync('version.py') && retrofit) {
