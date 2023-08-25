@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFile
 import { join } from 'path';
 import { ProjenrcJson, SampleDir, SampleFile, TextFile } from 'projen';
 import { GitHubProject, GitHubProjectOptions } from 'projen/lib/github';
+import { parse } from 'yaml';
 import { readmeMd } from './files/README';
 import { setupPy } from './files/setup.py';
 import { LicenseTestsWorkflow, ProposeReleaseWorkflow, PublishAlphaWorkflow, PublishReleaseWorkflow, SkillTestsWorkflow, UpdateSkillJsonWorkflow } from './GithubWorkflows';
@@ -197,16 +198,31 @@ ${line}`;
     new SampleFile(this, 'skill.json', {
       contents: '{}',
     });
-    let requirements = 'ovos-utils\novos-bus-client\novos-workshop';
-    if (retrofit) {
-      if (existsSync('requirements.txt')) {
-        const existingRequirements = readFileSync('requirements.txt').toString();
-        requirements = `${existingRequirements}\n${requirements}`;
-      } else {
-        new TextFile(this, 'requirements.txt', {
-          lines: requirements.split('\n'),
-        });
+    let requirements = 'ovos-utils\novos-bus-client\novos-workshop\n# Your requirements here\n';
+    let manifestReqs = '';
+    if (existsSync('manifest.yml')) {
+      // Load and parse YAML file
+      console.debug('Found manifest.yml, trying to extract Python dependencies');
+      const manifest = readFileSync('manifest.yml').toString();
+      const manifestObject = parse(manifest);
+      if (manifestObject.dependencies.python) {
+        manifestReqs = manifestObject.dependencies.python.join('\n') + '\n';
       }
+    }
+    if (existsSync('requirements.txt')) {
+      const existingRequirements = readFileSync('requirements.txt').toString();
+      requirements = `${existingRequirements}\n${manifestReqs ?? ''}${requirements}`;
+    } else {
+      new TextFile(this, 'requirements.txt', {
+        lines: [...requirements.split('\n'), ...manifestReqs.split('\n')],
+      });
+    }
+    if (!existsSync('version.py') && retrofit) {
+      new TextFile(this, 'version.py', {
+        lines: 'VERSION_MAJOR = 0\nVERSION_MINOR = 0\nVERSION_BUILD = 1\nVERSION_ALPHA = 0'.split('\n'),
+      });
+    };
+    if (retrofit) {
       if (existsSync('__init__.py') && !existsSync('setup.py')) {
         OVOSSkillProject.modernizeSkillCode('__init__.py');
       } else if (!existsSync('__init__.py') && !existsSync('setup.py')) {
@@ -405,6 +421,14 @@ ${line}`;
    */
   restructureLocaleFolders(sourceFolder: string) {
     ['vocab', 'dialog', 'regex', 'intents'].forEach((dir) => {
+      const dirPath = join(sourceFolder, dir);
+
+      // Check if the directory exists before proceeding
+      if (!existsSync(dirPath)) {
+        console.warn(`${dir} folder not found in original skill; skipping.`);
+        return; // Continue to the next iteration of the loop
+      }
+
       const locale = join(sourceFolder, 'locale');
       try {
         mkdirSync(locale, { recursive: true });
@@ -424,9 +448,8 @@ ${line}`;
             renameSync(join(sourceFolder, dir, lang), join(locale, lang, dir));
           }
         });
-
       } catch (err) {
-        console.debug(err);
+        console.error(err);
       }
     });
   }
