@@ -11,6 +11,8 @@ test('snapshot', () => {
 
   const synth = Testing.synth(project);
   expect(synth).toMatchSnapshot();
+  expect(synth['requirements.txt']).toBeDefined();
+  expect(synth['requirements.txt']).toContain('ovos-utils\novos-bus-client\novos-workshop');
 });
 
 test('snapshot retrofit', () => {
@@ -23,6 +25,8 @@ test('snapshot retrofit', () => {
 
   const synth = Testing.synth(project);
   expect(synth).toMatchSnapshot();
+  expect(synth['requirements.txt']).toBeDefined();
+  expect(synth['requirements.txt']).toContain('ovos-utils\novos-bus-client\novos-workshop');
 
   rmSync('TODO.md');
 });
@@ -42,6 +46,10 @@ test('snapshot retrofit with manifest.yml', () => {
 
   const synth = Testing.synth(project);
   expect(synth).toMatchSnapshot();
+  expect(synth['requirements.txt']).toBeDefined();
+  expect(synth['requirements.txt']).toContain('akinator');
+  expect(synth['requirements.txt']).toContain('rapidfuzz');
+  expect(synth['requirements.txt']).toContain('ovos-utils\novos-bus-client\novos-workshop');
 
   rmSync('manifest.yml');
   rmSync('TODO.md');

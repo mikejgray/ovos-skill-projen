@@ -212,10 +212,10 @@ ${line}`;
     }
     if (existsSync('requirements.txt')) {
       const existingRequirements = readFileSync('requirements.txt').toString();
-      requirements = `${existingRequirements}\n${manifestReqs ?? ''}${requirements}`;
+      requirements = `${existingRequirements}\n${manifestReqs ?? ''}\n${requirements}`;
     } else {
-      new TextFile(this, 'requirements.txt', {
-        lines: [...requirements.split('\n'), ...manifestReqs.split('\n')],
+      new SampleFile(this, 'requirements.txt', {
+        contents: requirements + '\n' + manifestReqs,
       });
     }
     if (!existsSync('version.py') && retrofit) {

@@ -13,7 +13,7 @@ DEFAULT_SETTINGS = {
 }
 
 class HelloWorldSkill(OVOSSkill):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, bus=None, **kwargs):
         """The __init__ method is called when the Skill is first constructed.
         Note that self.bus, self.skill_id, self.settings, and
         other base class settings are only available after the call to super().
@@ -21,7 +21,7 @@ class HelloWorldSkill(OVOSSkill):
         This is a good place to load and pre-process any data needed by your
         Skill, ideally after the super() call.
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, bus=bus, **kwargs)
         self.learning = True
 
     def initialize(self):
