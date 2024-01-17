@@ -117,7 +117,7 @@ setup(
     author="${author}",
     author_email="${authorAddress}",
     license="${license}",
-    package_dir={SKILL_PKG: ""},
+    package_dir={SKILL_PKG: "${packageDir ?? '.'}"},
     package_data={SKILL_PKG: find_resource_files()},
     packages=[SKILL_PKG],
     include_package_data=True,

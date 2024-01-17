@@ -199,7 +199,7 @@ ${line}`;
     new SampleFile(this, 'skill.json', {
       contents: '{}',
     });
-    let requirements = 'ovos-utils\novos-bus-client\novos-workshop\n# Your requirements here\n';
+    let requirements = 'ovos-utils\novos-bus-client\novos-workshop\novos-plugin-manager\n# Your requirements here\n';
     let manifestReqs = '';
     if (existsSync('manifest.yml')) {
       // Load and parse YAML file
@@ -425,6 +425,7 @@ ${line}`;
       const dirPath = join(sourceFolder, dir);
 
       // Check if the directory exists before proceeding
+      console.debug(`Checking if ${dirPath} folder exists in original skill...`);
       if (!existsSync(dirPath)) {
         console.warn(`${dir} folder not found in original skill; skipping.`);
         return; // Continue to the next iteration of the loop
