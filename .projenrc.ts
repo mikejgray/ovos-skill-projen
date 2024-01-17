@@ -25,6 +25,7 @@ const project = new cdk.JsiiProject({
   deps: ['projen'],
   bundledDeps: ['yaml'],
   devDeps: ['jsii-rosetta@~5.0.7'],
+  gitignore: ['.DS_Store'],
   description: 'A projen project for creating OVOS skills, or retrofitting Mycroft skills to OVOS',
 });
 project.compileTask.exec(

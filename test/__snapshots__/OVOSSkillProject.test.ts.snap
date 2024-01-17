@@ -541,6 +541,12 @@ from ovos_utils.process_utils import RuntimeRequirements
 from ovos_workshop.decorators import intent_handler
 from ovos_workshop.skills import OVOSSkill
 
+# Optional - if you want to populate settings.json with default values, do so here
+DEFAULT_SETTINGS = {
+    \\"setting1\\": True,
+    \\"setting2\\": 50,
+    \\"setting3\\": \\"test\\"
+}
 
 class HelloWorldSkill(OVOSSkill):
     def __init__(self, *args, **kwargs):
@@ -553,6 +559,11 @@ class HelloWorldSkill(OVOSSkill):
         \\"\\"\\"
         super().__init__(*args, **kwargs)
         self.learning = True
+
+    def initialize(self):
+        # merge default settings
+        # self.settings is a jsondb, which extends the dict class and adds helpers like merge
+        self.settings.merge(DEFAULT_SETTINGS, new_only=True)
 
     @classproperty
     def runtime_requirements(self):
@@ -569,7 +580,7 @@ class HelloWorldSkill(OVOSSkill):
         )
 
     @property
-    def get_my_setting(self):
+    def my_setting(self):
         \\"\\"\\"Dynamically get the my_setting from the skill settings file.
         If it doesn't exist, return the default value.
         This will reflect live changes to settings.json files (local or from backend)
@@ -580,7 +591,7 @@ class HelloWorldSkill(OVOSSkill):
     def handle_how_are_you_intent(self, message):
         \\"\\"\\"This is a Padatious intent handler.
         It is triggered using a list of sample phrases.\\"\\"\\"
-        self.speak_dialog(\\"hello.world\\")
+        self.speak_dialog(\\"hello_world\\")
 
     @intent_handler(IntentBuilder(\\"HelloWorldIntent\\").require(\\"HelloWorldKeyword\\"))
     def handle_hello_world_intent(self, message):
@@ -588,7 +599,7 @@ class HelloWorldSkill(OVOSSkill):
         Skills can log useful information. These will appear in the CLI and
         the skills.log file.\\"\\"\\"
         self.log.info(\\"There are five types of log messages: \\" \\"info, debug, warning, error, and exception.\\")
-        self.speak_dialog(\\"hello.world\\")
+        self.speak_dialog(\\"hello_world\\")
 
     @intent_handler(IntentBuilder(\\"RoboticsLawsIntent\\").require(\\"LawKeyword\\").build())
     def handle_robotic_laws_intent(self, message):
