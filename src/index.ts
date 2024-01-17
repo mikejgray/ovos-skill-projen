@@ -116,16 +116,17 @@ from ovos_bus_client.message import Message`;
       if (line.startsWith('from mycroft')) {
         skillFileArray[index] = `# TODO: Remove all Mycroft imports\n# ${line}`;
       }
+      // Replace Adapt IntentBuilder import
+      if (line.startsWith('from adapt.intent import IntentBuilder')) {
+        skillFileArray[index] = `# TODO: Replace Adapt IntentBuilder import\n# ${line}`;
+      }
       // Best practices for super().__init__
       if (line.includes('super().__init__') && line.includes('name=')) {
         skillFileArray[index] = `# TODO: Remove name= parameter from super().__init__
 # TODO: Replace args with *args, **kwargs
 ${line}`;
       }
-      // Deprecated initialize() and create_skill()
-      if (line.includes('def initialize()')) {
-        skillFileArray[index] = `# TODO: Remove initialize() and move to __init__() after the super call\n${line}`;
-      }
+      // Deprecated create_skill()
       if (line.includes('def create_skill(')) {
         skillFileArray[index] = `# TODO: Remove create_skill() function\n${line}`;
       }
