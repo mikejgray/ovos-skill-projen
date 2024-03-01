@@ -22,9 +22,14 @@ Add that to your `~/.bashrc` or `~/.zshrc` file to make it permanent. Be sure to
 
 In a new directory, run:
 
-`projen new ovosskill --from "@mikejgray/ovos-skill-projen"`
+`projen new ovosskill --from "@mikejgray/ovos-skill-projen@latest"`
 
-**NOTE**: This repo is not yet available on NPM. Please add the following to your `~/.npmrc` file (create one if it doesn't exist): `@mikejgray:registry=https://npm.pkg.github.com`
+**NOTE**: This repo is not yet available on NPM. Please add the following to your `~/.npmrc` file (create one if it doesn't exist), with [a GitHub token that has packages:read permissions](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry):
+
+```
+//npm.pkg.github.com/:_authToken=ghp_aeojghxotdj583r38fgzrh48
+@mikejgray:registry=https://npm.pkg.github.com
+```
 
 After the skill has been created with default options, a file called `.projenrc.json` will be generated. This file contains all of the options used to create the skill, and can be edited to change the skill's configuration. For a full list of supported options, see [`API.md`](API.md).
 
@@ -55,11 +60,11 @@ Note that projen takes ownership of the `setup.py` file, and the expectation is 
 
 If you prefer not to keep the skill repository under projen's management, simply delete `node_modules`, `.projenrc.json`, `.gitattributes`, `.projen`, and `package.json` from the skill directory. You can also delete `.github/workflows` if you do not want to use GitHub Actions automation workflows.
 
-## Retrofitting Mycroft skills (WIP)
+## Retrofitting Mycroft skills (WIP, please open issues if it doesn't work for your use case)
 
 If you have an existing Mycroft skill that you'd like to convert to an OVOS skill, you can do so by running the following command in your skill directory:
 
-`projen new ovosskill --from "@mikejgray/ovos-skill-projen" --retrofit`
+`projen new ovosskill --from "@mikejgray/ovos-skill-projen@latest" --retrofit`
 
 This will:
 
