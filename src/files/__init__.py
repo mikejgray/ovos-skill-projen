@@ -1,6 +1,6 @@
 from ovos_utils import classproperty
-from ovos_utils.intents import IntentBuilder
 from ovos_utils.process_utils import RuntimeRequirements
+from ovos_workshop.intents import IntentBuilder
 from ovos_workshop.decorators import intent_handler
 # from ovos_workshop.intents import IntentHandler # Uncomment to use Adapt intents
 from ovos_workshop.skills import OVOSSkill

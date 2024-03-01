@@ -103,12 +103,12 @@ export class OVOSSkillProject extends GitHubProject {
     let existingSkillFileContents = readFileSync(file).toString();
     let ovosImports = `# TODO: Remove unused OVOS imports
 from ovos_workshop.decorators import intent_handler
+from ovos_workshop.intents import IntentBuilder
 from ovos_workshop.skills import OVOSSkill
-from ovos_utils.intents import IntentBuilder
 from ovos_bus_client.message import Message`;
     // Replacements
     if (existingSkillFileContents.includes('AdaptIntent')) {
-      ovosImports += '\nfrom ovos_utils.intents import AdaptIntent';
+      ovosImports += '\nfrom ovos_workshop.intents import AdaptIntent';
     }
     let skillFileArray = existingSkillFileContents.split('\n');
     skillFileArray.forEach((line, index) => {
