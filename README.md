@@ -22,7 +22,7 @@ Add that to your `~/.bashrc` or `~/.zshrc` file to make it permanent. Be sure to
 
 In a new directory, run:
 
-`projen new ovosskill --from "@mikejgray/ovos-skill-projen@latest"`
+`npx projen new ovosskill --from "@mikejgray/ovos-skill-projen@latest"`
 
 **NOTE**: This repo is not yet available on NPM. Please add the following to your `~/.npmrc` file (create one if it doesn't exist), with [a GitHub token that has packages:read permissions](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry):
 
@@ -51,6 +51,26 @@ Example:
 ```
 
 After editing `.projenrc.json`, run `pj` to regenerate the project files. This can automatically keep your project up to date with the latest changes, including managing your `setup.py` file.
+
+## Create a new PHAL plugin template
+
+In a new directory, run:
+
+`npx projen new ovosphal --from "@mikejgray/ovos-skill-projen@latest"`
+
+The instructions are the same as for creating a new skill template, except that you have an additional option to set the PHAL plugin as admin or not. The default is `false`, indicating that the PHAL plugin will not run as root.
+
+**NOTE:** If you do set the PHAL plugin to `admin` and thus run as root, you will also need to update your OVOS config to explicitly allow your root plugins. This is a security risk and should only be done if you understand the implications. For more information about Admin PHAL, [see the OVOS technical manual](https://openvoiceos.github.io/ovos-technical-manual/PHAL/#admin-phal).
+
+Example OVOS config:
+
+```json
+{
+  "PHAL": {
+    "admin": "ovos-phal-plugin-helloworld": {"enabled": true}
+  }
+}
+```
 
 ### setup.py ownership
 

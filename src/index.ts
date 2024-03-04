@@ -5,7 +5,9 @@ import { ProjenrcJson, SampleDir, SampleFile, TextFile } from 'projen';
 import { GitHubProject, GitHubProjectOptions } from 'projen/lib/github';
 import { parse } from 'yaml';
 import { readmeMd } from './files/README';
+import { readmePhalMd } from './files/README.phal';
 import { setupPy } from './files/setup.py';
+import { setupPhalPy } from './files/setup.py.phal';
 import { LicenseTestsWorkflow, ProposeReleaseWorkflow, PublishAlphaWorkflow, PublishReleaseWorkflow, SkillTestsWorkflow, UpdateSkillJsonWorkflow } from './GithubWorkflows';
 
 export interface OVOSSkillProjectOptions extends GitHubProjectOptions {
@@ -456,4 +458,218 @@ ${line}`;
     });
   }
 
+}
+
+export interface OVOSPHALProjectOptions extends OVOSSkillProjectOptions {
+  /**
+   * Is this an admin PHAL plugin?
+   * @default false
+   */
+  readonly admin?: boolean;
+}
+export class OVOSPHALProject extends GitHubProject {
+  constructor(options: OVOSPHALProjectOptions) {
+    let superProps = { ...options };
+    superProps.readme = {
+      contents: readmePhalMd({
+        skillClass: options.skillClass ?? 'OVOSSkill',
+        authorName: options.author ?? 'authorName',
+        authorHandle: options.authorHandle ?? 'githubUsername',
+      }),
+    };
+    super(superProps);
+
+    const author = options.author ?? 'TODO: Add \'author\' to .projenrc.json and run pj';
+    const repositoryUrl = options.repositoryUrl ?? 'TODO: Add \'repositoryUrl\' to .projenrc.json and run pj';
+    const authorAddress = options.authorAddress ?? 'TODO: Add \'authorAddress\' to .projenrc.json and run pj';
+    const license = options.license ?? '# TODO: Add \'license\' to .projenrc.json and run pj';
+    const skillClass = options.skillClass ?? 'TODO: Add \'skillClass\' to .projenrc.json and run pj';
+    const pypiName = options.pypiName ?? process.cwd().split('/').pop()!;
+    const packageDir = options.packageDir ?? 'src';
+    const skillDescription = options.skillDescription ?? '';
+    const admin = options.admin ?? false;
+    new TextFile(this, 'setup.py', {
+      lines: setupPhalPy({
+        repositoryUrl,
+        packageDir,
+        pypiName,
+        author,
+        authorAddress,
+        license,
+        description: skillDescription,
+        pluginClass: skillClass,
+        admin,
+      }).split('\n'),
+    });
+    new TextFile(this, 'version.py', {
+      lines: 'VERSION_MAJOR = 0\nVERSION_MINOR = 0\nVERSION_BUILD = 1\nVERSION_ALPHA = 0'.split('\n'),
+    });
+    // projenrc.json
+    new ProjenrcJson(this, {});
+    // gitignore
+    this.gitignore.addPatterns('.DS_Store', 'node_modules');
+    this.addPythonGitIgnore();
+    this.createGenericSkillCode(packageDir);
+    let requirements = 'ovos-utils\novos-bus-client\novos-workshop\novos-plugin-manager\n# Your requirements here\n';
+    new SampleFile(this, 'requirements.txt', {
+      contents: requirements,
+    });
+    this.createDevBranch();
+  }
+  // Methods
+  /**
+   * Create a generic skill with sample code.
+   * @param dir The name of the directory to create sample code in
+   * @default "src"
+   * @example "neon_phal_plugin_audio_receiver"
+   */
+  createGenericSkillCode(dir: string) {
+    new SampleDir(this, dir, {
+      files: {
+        '__init__.py': readFileSync(join(__dirname, 'files', '__init__.phal.py')).toString(),
+        'version.py': 'VERSION_MAJOR = 0\nVERSION_MINOR = 0\nVERSION_BUILD = 1\nVERSION_ALPHA = 0',
+      },
+    });
+  }
+  /**
+   * Create a dev branch if it doesn't already exist, and set it as the default branch.
+   */
+  createDevBranch() {
+    exec('git rev-parse --verify dev', (err) => {
+      if (err) {
+        exec('git checkout -b dev');
+        exec('git branch -M dev');
+      }
+    });
+  }
+  addPythonGitIgnore() {
+    this.gitignore.exclude(
+      '# Byte-compiled / optimized / DLL files',
+      '__pycache__/',
+      '*.py[cod]',
+      '*$py.class',
+      '',
+      '# C extensions',
+      '*.so',
+      '',
+      '# Distribution / packaging',
+      '.Python',
+      'build/',
+      'develop-eggs/',
+      'dist/',
+      'downloads/',
+      'eggs/',
+      '.eggs/',
+      'lib/',
+      'lib64/',
+      'parts/',
+      'sdist/',
+      'var/',
+      'wheels/',
+      'share/python-wheels/',
+      '*.egg-info/',
+      '.installed.cfg',
+      '*.egg',
+      'MANIFEST',
+      '',
+      '# PyInstaller',
+      '#  Usually these files are written by a python script from a template',
+      '#  before PyInstaller builds the exe, so as to inject date/other infos into it.',
+      '*.manifest',
+      '*.spec',
+      '',
+      '# Installer logs',
+      'pip-log.txt',
+      'pip-delete-this-directory.txt',
+      '',
+      '# Unit test / coverage reports',
+      'htmlcov/',
+      '.tox/',
+      '.nox/',
+      '.coverage',
+      '.coverage.*',
+      '.cache',
+      'nosetests.xml',
+      'coverage.xml',
+      '*.cover',
+      '*.py,cover',
+      '.hypothesis/',
+      '.pytest_cache/',
+      'cover/',
+      '',
+      '# Translations',
+      '*.mo',
+      '*.pot',
+      '',
+      '# Django stuff:',
+      '*.log',
+      'local_settings.py',
+      'db.sqlite3',
+      'db.sqlite3-journal',
+      '',
+      '# Flask stuff:',
+      'instance/',
+      '.webassets-cache',
+      '',
+      '# Scrapy stuff:',
+      '.scrapy',
+      '',
+      '# Sphinx documentation',
+      'docs/_build/',
+      '',
+      '# PyBuilder',
+      '.pybuilder/',
+      'target/',
+      '',
+      '# Jupyter Notebook',
+      '.ipynb_checkpoints',
+      '',
+      '# IPython',
+      'profile_default/',
+      'ipython_config.py',
+      '',
+      '# PEP 582; used by e.g. github.com/David-OConnor/pyflow',
+      '__pypackages__/',
+      '',
+      '# Celery stuff',
+      'celerybeat-schedule',
+      'celerybeat.pid',
+      '',
+      '# SageMath parsed files',
+      '*.sage.py',
+      '',
+      '# Environments',
+      '.env',
+      '.venv',
+      'env/',
+      'venv/',
+      'ENV/',
+      'env.bak/',
+      'venv.bak/',
+      '',
+      '# Spyder project settings',
+      '.spyderproject',
+      '.spyproject',
+      '',
+      '# Rope project settings',
+      '.ropeproject',
+      '',
+      '# mkdocs documentation',
+      '/site',
+      '',
+      '# mypy',
+      '.mypy_cache/',
+      '.dmypy.json',
+      'dmypy.json',
+      '',
+      '# Pyre type checker',
+      '.pyre/',
+      '',
+      '# pytype static type analyzer',
+      '.pytype/',
+      '',
+      '# Cython debug symbols',
+      'cython_debug/',
+    );
+  }
 }
