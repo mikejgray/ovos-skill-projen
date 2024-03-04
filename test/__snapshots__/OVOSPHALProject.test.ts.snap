@@ -344,7 +344,7 @@ setup(
     include_package_data=True,
     install_requires=get_requirements(\\"requirements.txt\\"),
     keywords=\\"ovos plugin voice assistant\\",
-    entry_points={ovos.plugin.phal: PLUGIN_ENTRY_POINT},
+    entry_points={\\"ovos.plugin.phal\\": PLUGIN_ENTRY_POINT},
 )
 ",
   "src/__init__.py": "from ovos_bus_client import Message
