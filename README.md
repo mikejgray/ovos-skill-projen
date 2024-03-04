@@ -22,7 +22,7 @@ Add that to your `~/.bashrc` or `~/.zshrc` file to make it permanent. Be sure to
 
 In a new directory, run:
 
-`projen new ovosskill --from "@mikejgray/ovos-skill-projen@latest"`
+`npx projen new ovosskill --from "@mikejgray/ovos-skill-projen@latest"`
 
 **NOTE**: This repo is not yet available on NPM. Please add the following to your `~/.npmrc` file (create one if it doesn't exist), with [a GitHub token that has packages:read permissions](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry):
 
@@ -56,7 +56,7 @@ After editing `.projenrc.json`, run `pj` to regenerate the project files. This c
 
 In a new directory, run:
 
-`projen new ovosphal --from "@mikejgray/ovos-skill-projen@latest"`
+`npx projen new ovosphal --from "@mikejgray/ovos-skill-projen@latest"`
 
 The instructions are the same as for creating a new skill template, except that you have an additional option to set the PHAL plugin as admin or not. The default is `false`, indicating that the PHAL plugin will not run as root.
 

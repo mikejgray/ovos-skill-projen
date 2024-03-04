@@ -6,7 +6,7 @@ import { GitHubProject, GitHubProjectOptions } from 'projen/lib/github';
 import { parse } from 'yaml';
 import { readmeMd } from './files/README';
 import { readmePhalMd } from './files/README.phal';
-import { setupPy, setupPyInterface } from './files/setup.py';
+import { setupPy } from './files/setup.py';
 import { setupPhalPy } from './files/setup.py.phal';
 import { LicenseTestsWorkflow, ProposeReleaseWorkflow, PublishAlphaWorkflow, PublishReleaseWorkflow, SkillTestsWorkflow, UpdateSkillJsonWorkflow } from './GithubWorkflows';
 
@@ -186,15 +186,17 @@ ${line}`;
       this.createGenericSkillCode(packageDir);
     }
     // Root files
-    this.createSetupPy(this, {
-      repositoryUrl,
-      packageDir,
-      author,
-      authorAddress,
-      pypiName,
-      skillClass,
-      license,
-      description: skillDescription,
+    new TextFile(this, 'setup.py', {
+      lines: setupPy({
+        repositoryUrl: repositoryUrl,
+        packageDir: packageDir,
+        pypiName: pypiName,
+        author: author,
+        authorAddress: authorAddress,
+        license: license,
+        description: skillDescription,
+        skillClass: skillClass,
+      }).split('\n'),
     });
     new SampleFile(this, 'skill.json', {
       contents: '{}',
@@ -239,20 +241,6 @@ ${line}`;
   }
 
   // Methods
-  createSetupPy(construct: OVOSSkillProject, setupOptions: setupPyInterface) {
-    new TextFile(construct, 'setup.py', {
-      lines: setupPy({
-        repositoryUrl: setupOptions.repositoryUrl,
-        packageDir: setupOptions.packageDir,
-        pypiName: setupOptions.pypiName,
-        author: setupOptions.author,
-        authorAddress: setupOptions.authorAddress,
-        license: setupOptions.license,
-        description: setupOptions.description,
-        skillClass: setupOptions.skillClass,
-      }).split('\n'),
-    });
-  }
   /**
    * Create a generic skill with sample code.
    * @param dir The name of the directory to create sample code in
