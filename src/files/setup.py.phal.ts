@@ -129,7 +129,7 @@ setup(
     include_package_data=True,
     install_requires=get_requirements("requirements.txt"),
     keywords="ovos plugin voice assistant",
-    entry_points={${admin ? 'ovos.plugin.phal.admin' : 'ovos.plugin.phal'}: PLUGIN_ENTRY_POINT},
+    entry_points={"${admin ? 'ovos.plugin.phal.admin' : 'ovos.plugin.phal'}": PLUGIN_ENTRY_POINT},
 )
 `;
 };

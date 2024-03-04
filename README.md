@@ -56,7 +56,7 @@ After editing `.projenrc.json`, run `pj` to regenerate the project files. This c
 
 In a new directory, run:
 
-`npx projen new ovosphal --from "@mikejgray/ovos-skill-projen@latest"`
+`npx projen new ovosphalproject --from "@mikejgray/ovos-skill-projen@latest"`
 
 The instructions are the same as for creating a new skill template, except that you have an additional option to set the PHAL plugin as admin or not. The default is `false`, indicating that the PHAL plugin will not run as root.
 
