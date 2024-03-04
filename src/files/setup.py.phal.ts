@@ -1,48 +1,54 @@
-export interface setupPyInterface {
+interface setupPyInterface {
   /**
-     * The URL of the skill's GitHub repository.
+     * The URL of the plugin's GitHub repository.
   */
   repositoryUrl: string;
   /**
-   * The name of the directory containing the skill's code.
+   * The name of the directory containing the plugin's code.
    * @default "" (root)
    */
   packageDir: string;
   /**
-   * The name of the skill's author.
+   * The name of the plugin's author.
    */
   author: string;
   /**
-   * The email address of the skill's author.
+   * The email address of the plugin's author.
    */
   authorAddress: string;
   /**
-   * The name of the skill class.
+   * The name of the plugin class.
    */
-  skillClass: string;
+  pluginClass: string;
   /**
-   * The name of the skill's PyPi package.
+   * The name of the plugin's PyPi package.
    */
   pypiName: string;
   /**
-   * The description of the skill.
+   * The description of the plugin.
    */
   description: string;
   /**
-   * The license of the skill.
+   * The license of the plugin.
    */
   license: string;
+  /**
+   * Whether the plugin is an admin PHAL plugin, meaning it runs as root.
+   * @default false
+   */
+  admin?: boolean;
 }
 
-export const setupPy = ({
+export const setupPhalPy = ({
   repositoryUrl,
   packageDir,
   author,
   authorAddress,
   pypiName,
-  skillClass,
+  pluginClass,
   description,
   license,
+  admin,
 }: setupPyInterface): string => {
   return `#!/usr/bin/env python3
 from setuptools import setup
@@ -50,14 +56,14 @@ from os import walk, path
 
 BASEDIR = path.abspath(path.dirname(__file__))
 URL = "${repositoryUrl}"
-SKILL_CLAZZ = "${skillClass}"  # needs to match __init__.py class name
+plugin_CLAZZ = "${pluginClass}"  # needs to match __init__.py class name
 PYPI_NAME = "${pypiName}"  # pip install PYPI_NAME
 
-# below derived from github url to ensure standard skill_id
-SKILL_AUTHOR, SKILL_NAME = URL.split(".com/")[-1].split("/")
-SKILL_PKG = SKILL_NAME.lower().replace("-", "_")
-PLUGIN_ENTRY_POINT = f"{SKILL_NAME.lower()}.{SKILL_AUTHOR.lower()}={SKILL_PKG}:{SKILL_CLAZZ}"
-# skill_id=package_name:SkillClass
+# below derived from github url to ensure standard plugin_id
+plugin_AUTHOR, plugin_NAME = URL.split(".com/")[-1].split("/")
+plugin_PKG = plugin_NAME.lower().replace("-", "_")
+PLUGIN_ENTRY_POINT = f"{plugin_NAME.lower()}.{plugin_AUTHOR.lower()}={plugin_PKG}:{plugin_CLAZZ}"
+# plugin_id=package_name:pluginClass
 BASE_PATH = BASE_PATH = path.abspath(path.join(path.dirname(__file__), "${packageDir}"))
 
 
@@ -117,13 +123,13 @@ setup(
     author="${author}",
     author_email="${authorAddress}",
     license="${license}",
-    package_dir={SKILL_PKG: "${packageDir ?? '.'}"},
-    package_data={SKILL_PKG: find_resource_files()},
-    packages=[SKILL_PKG],
+    package_dir={plugin_PKG: "${packageDir ?? '.'}"},
+    package_data={plugin_PKG: find_resource_files()},
+    packages=[plugin_PKG],
     include_package_data=True,
     install_requires=get_requirements("requirements.txt"),
-    keywords="ovos skill voice assistant",
-    entry_points={"ovos.plugin.skill": PLUGIN_ENTRY_POINT},
+    keywords="ovos plugin voice assistant",
+    entry_points={${admin ? 'ovos.plugin.phal.admin' : 'ovos.plugin.phal'}: PLUGIN_ENTRY_POINT},
 )
 `;
 };

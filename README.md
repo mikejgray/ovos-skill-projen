@@ -52,6 +52,26 @@ Example:
 
 After editing `.projenrc.json`, run `pj` to regenerate the project files. This can automatically keep your project up to date with the latest changes, including managing your `setup.py` file.
 
+## Create a new PHAL plugin template
+
+In a new directory, run:
+
+`projen new ovosphal --from "@mikejgray/ovos-skill-projen@latest"`
+
+The instructions are the same as for creating a new skill template, except that you have an additional option to set the PHAL plugin as admin or not. The default is `false`, indicating that the PHAL plugin will not run as root.
+
+**NOTE:** If you do set the PHAL plugin to `admin` and thus run as root, you will also need to update your OVOS config to explicitly allow your root plugins. This is a security risk and should only be done if you understand the implications. For more information about Admin PHAL, [see the OVOS technical manual](https://openvoiceos.github.io/ovos-technical-manual/PHAL/#admin-phal).
+
+Example OVOS config:
+
+```json
+{
+  "PHAL": {
+    "admin": "ovos-phal-plugin-helloworld": {"enabled": true}
+  }
+}
+```
+
 ### setup.py ownership
 
 Note that projen takes ownership of the `setup.py` file, and the expectation is that manual edits are not allowed. If you need to make changes to the `setup.py` file, you should do so by editing `.projenrc.json` and running `pj` to regenerate the file.
