@@ -257,7 +257,6 @@ ${line}`;
         'locale/en-us/dialog/robotics.dialog': 'I am not bound by the laws of robotics',
         'locale/en-us/vocab/HelloWorldKeyword.voc': 'hello world\ngreetings',
         'locale/en-us/intents/HowAreYou.intent': 'how are you( doing|)\nhow have you been\nhow has your day been',
-        'locale/en-us/regex/Law.rx': '(the|is) (?P<LawOfRobotics>.*) (law of robotic|law of robotics)',
       },
     });
   }
