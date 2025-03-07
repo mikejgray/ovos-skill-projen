@@ -25,12 +25,13 @@ const project = new cdk.JsiiProject({
   deps: ['projen'],
   bundledDeps: ['yaml'],
   devDeps: ['jsii-rosetta@~5.0.7'],
-  gitignore: ['.DS_Store'],
+  gitignore: ['.DS_Store', 'TODO.md'],
   description: 'A projen project for creating OVOS skills, or retrofitting Mycroft skills to OVOS',
 });
 project.compileTask.exec(
   'cp src/files/* lib/files',
 );
+project.addDevDeps('eslint@^8');
 
 const upgradeMain = project.tryFindObjectFile('.github/workflows/upgrade-main.yml');
 upgradeMain?.addOverride('jobs.pr.steps.4.with.token', '${{ secrets.GITHUB_TOKEN }}');

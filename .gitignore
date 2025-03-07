@@ -31,7 +31,7 @@ jspm_packages/
 .yarn-integrity
 .cache
 .DS_Store
-!/.projenrc.js
+TODO.md
 /test-reports/
 junit.xml
 /coverage/
@@ -41,7 +41,6 @@ junit.xml
 !/.github/workflows/release.yml
 !/.github/workflows/upgrade-main.yml
 !/.github/pull_request_template.md
-!/.npmrc
 !/test/
 !/tsconfig.dev.json
 !/src/
@@ -51,3 +50,4 @@ junit.xml
 .jsii
 tsconfig.json
 !/API.md
+!/.projenrc.ts
