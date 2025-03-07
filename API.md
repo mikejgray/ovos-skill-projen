@@ -1,113 +1,1781 @@
-# ovos-skill-projen
-
-This [projen](https://projen.io/) project template is used to create a new OVOS Skill, which can be used with both [OVOS](https://openvoiceos.com) and [Neon.AI](https://neon.ai) voice assistants. It can also be used to retrofit an existing MycroftSkill to work with OVOS' most current development practices.
-
-## Installing projen
-
-Projen was created by primarily TypeScript developers working in the AWS CDK ecosystem, so it is written in TypeScript and requires Node.js to run.
-
-Generally, it is recommended to use `nvm` (Node Version Manager) to install Node.js on Linux and macOS. Instructions for installing `nvm` can be found at [github.com/nvm-sh/nvm](https://github.com/nvm-sh/nvm).
-
-After you've installed Node, projen can be installed globally with:
-
-`npm install -g projen`
-
-Generally, most `projen` users alias the `npx projen` command to `pj` for convenience. This can be done with:
-
-`alias pj='npx projen'`
-
-Add that to your `~/.bashrc` or `~/.zshrc` file to make it permanent. Be sure to run `source ~/.bashrc` or `source ~/.zshrc` to reload your shell after adding the line above.
-
-## Create a new skill template
-
-In a new directory, run:
-
-`npx projen new ovosskill --from "@mikejgray/ovos-skill-projen@latest"`
-
-**NOTE**: This repo is not yet available on NPM. Please add the following to your `~/.npmrc` file (create one if it doesn't exist), with [a GitHub token that has packages:read permissions](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry):
-
-```
-//npm.pkg.github.com/:_authToken=ghp_aeojghxotdj583r38fgzrh48
-@mikejgray:registry=https://npm.pkg.github.com
-```
-
-After the skill has been created with default options, a file called `.projenrc.json` will be generated. This file contains all of the options used to create the skill, and can be edited to change the skill's configuration. For a full list of supported options, see [`API.md`](API.md).
-
-Most commonly, you will want to change the `name`, `author`, `authorAddress`, `authorHandle`, `skillClass`, and `repositoryUrl` options. If you prefer to have an explicitly named directory for your source code instead of the default `src`, then `packageDir` should also be set. The `type` option should be left alone, as it is used to tell projen which project template to use.
-
-Example:
-
-```json
-{
-  "type": "@mikejgray/ovos-skill-projen.OVOSSkillProject",
-  "name": "test-skill",
-  "author": "Mike Gray",
-  "authorAddress": "mike@graywind.org",
-  "authorHandle": "mikejgray",
-  "repositoryUrl": "https://github.com/mikejgray/test-skill",
-  "packageDir": "test_skill",
-  "skillClass": "TestSkill"
-}
-```
-
-After editing `.projenrc.json`, run `pj` to regenerate the project files. This can automatically keep your project up to date with the latest changes, including managing your `setup.py` file.
-
-## Create a new PHAL plugin template
-
-In a new directory, run:
-
-`npx projen new ovosphalproject --from "@mikejgray/ovos-skill-projen@latest"`
-
-The instructions are the same as for creating a new skill template, except that you have an additional option to set the PHAL plugin as admin or not. The default is `false`, indicating that the PHAL plugin will not run as root.
-
-**NOTE:** If you do set the PHAL plugin to `admin` and thus run as root, you will also need to update your OVOS config to explicitly allow your root plugins. This is a security risk and should only be done if you understand the implications. For more information about Admin PHAL, [see the OVOS technical manual](https://openvoiceos.github.io/ovos-technical-manual/PHAL/#admin-phal).
-
-Example OVOS config:
-
-```json
-{
-  "PHAL": {
-    "admin": "ovos-phal-plugin-helloworld": {"enabled": true}
-  }
-}
-```
-
-### setup.py ownership
-
-Note that projen takes ownership of the `setup.py` file, and the expectation is that manual edits are not allowed. If you need to make changes to the `setup.py` file, you should do so by editing `.projenrc.json` and running `pj` to regenerate the file.
-
-### Taking manual ownership of the repository
-
-If you prefer not to keep the skill repository under projen's management, simply delete `node_modules`, `.projenrc.json`, `.gitattributes`, `.projen`, and `package.json` from the skill directory. You can also delete `.github/workflows` if you do not want to use GitHub Actions automation workflows.
-
-## Retrofitting Mycroft skills (WIP, please open issues if it doesn't work for your use case)
-
-If you have an existing Mycroft skill that you'd like to convert to an OVOS skill, you can do so by running the following command in your skill directory:
-
-`projen new ovosskill --from "@mikejgray/ovos-skill-projen@latest" --retrofit`
-
-This will:
-
-- Add the OVOS skill requirements to your `requirements.txt` file, creating one if it does not exist
-- Overwrite your .gitignore file with a standard Python .gitignore plus `node_modules` and `.DS_Store`
-- Create a dev branch, if one does not exist, and commit the changes to it
-- Add all of OVOS' standard GitHub Actions workflows to your `.github/workflows` directory
-- Move files in `ui`, `intent`, `dialog`, etc. directories to `locale`, respecting the language folders within
-- Replace Mycroft imports with their OVOS replacements in your `__init__.py` file, assuming it is in the root of the repo
-
-It will not:
-
-- Overwrite your README.md file, if it exists, or create one if it does not exist
-- Create sample code
-- Touch your LICENSE file
-  - Note that official OVOS and Neon skills have skill license requirements that may not be compatible with your existing license, if you want to submit it as part of one of those organizations. Please review the [OVOS skill license requirements](https://openvoiceos.github.io/ovos-technical-manual/license/). If you are not submitting your skill to OVOS or Neon, you can use any license you like, and should set `skillLicenseTest: false` in your `.projenrc.json` file.
-
-Once the retrofit is complete, you can review the changes needed for modernization with `grep TODO __init__.py`. This project attempts to handle as many as possible, but due to differences in code style and structure, some changes will need to be made manually.
-
-If your skill code is not in `__init__.py` in the repository root, the retrofit code won't be able to find it. PRs welcome to add support for other skill structures.
-
 # API Reference <a name="API Reference" id="api-reference"></a>
 
+## Constructs <a name="Constructs" id="Constructs"></a>
+
+### OVOSPHALProject <a name="OVOSPHALProject" id="@mikejgray/ovos-skill-projen.OVOSPHALProject"></a>
+
+#### Initializers <a name="Initializers" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.Initializer"></a>
+
+```typescript
+import { OVOSPHALProject } from '@mikejgray/ovos-skill-projen'
+
+new OVOSPHALProject(options: OVOSPHALProjectOptions)
+```
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.Initializer.parameter.options">options</a></code> | <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProjectOptions">OVOSPHALProjectOptions</a></code> | *No description.* |
+
+---
+
+##### `options`<sup>Required</sup> <a name="options" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.Initializer.parameter.options"></a>
+
+- *Type:* <a href="#@mikejgray/ovos-skill-projen.OVOSPHALProjectOptions">OVOSPHALProjectOptions</a>
+
+---
+
+#### Methods <a name="Methods" id="Methods"></a>
+
+| **Name** | **Description** |
+| --- | --- |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.toString">toString</a></code> | Returns a string representation of this construct. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.addExcludeFromCleanup">addExcludeFromCleanup</a></code> | Exclude the matching files from pre-synth cleanup. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.addGitIgnore">addGitIgnore</a></code> | Adds a .gitignore pattern. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.addPackageIgnore">addPackageIgnore</a></code> | Exclude these files from the bundled package. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.addTask">addTask</a></code> | Adds a new task to this project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.addTip">addTip</a></code> | Prints a "tip" message during synthesis. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.annotateGenerated">annotateGenerated</a></code> | Marks the provided file(s) as being generated. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.postSynthesize">postSynthesize</a></code> | Called after all components are synthesized. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.preSynthesize">preSynthesize</a></code> | Called before all components are synthesized. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.removeTask">removeTask</a></code> | Removes a task from a project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.runTaskCommand">runTaskCommand</a></code> | Returns the shell command to execute in order to run a task. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.synth">synth</a></code> | Synthesize all project files into `outdir`. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.tryFindFile">tryFindFile</a></code> | Finds a file at the specified relative path within this project and all its subprojects. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.tryFindJsonFile">tryFindJsonFile</a></code> | Finds a json file by name. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.tryFindObjectFile">tryFindObjectFile</a></code> | Finds an object file (like JsonFile, YamlFile, etc.) by name. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.tryRemoveFile">tryRemoveFile</a></code> | Finds a file at the specified relative path within this project and removes it. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.addPythonGitIgnore">addPythonGitIgnore</a></code> | *No description.* |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.createDevBranch">createDevBranch</a></code> | Create a dev branch if it doesn't already exist, and set it as the default branch. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.createGenericSkillCode">createGenericSkillCode</a></code> | Create a generic skill with sample code. |
+
+---
+
+##### `toString` <a name="toString" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.toString"></a>
+
+```typescript
+public toString(): string
+```
+
+Returns a string representation of this construct.
+
+##### `addExcludeFromCleanup` <a name="addExcludeFromCleanup" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addExcludeFromCleanup"></a>
+
+```typescript
+public addExcludeFromCleanup(globs: ...string[]): void
+```
+
+Exclude the matching files from pre-synth cleanup.
+
+Can be used when, for example, some
+source files include the projen marker and we don't want them to be erased during synth.
+
+###### `globs`<sup>Required</sup> <a name="globs" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addExcludeFromCleanup.parameter.globs"></a>
+
+- *Type:* ...string[]
+
+The glob patterns to match.
+
+---
+
+##### `addGitIgnore` <a name="addGitIgnore" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addGitIgnore"></a>
+
+```typescript
+public addGitIgnore(pattern: string): void
+```
+
+Adds a .gitignore pattern.
+
+###### `pattern`<sup>Required</sup> <a name="pattern" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addGitIgnore.parameter.pattern"></a>
+
+- *Type:* string
+
+The glob pattern to ignore.
+
+---
+
+##### `addPackageIgnore` <a name="addPackageIgnore" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addPackageIgnore"></a>
+
+```typescript
+public addPackageIgnore(_pattern: string): void
+```
+
+Exclude these files from the bundled package.
+
+Implemented by project types based on the
+packaging mechanism. For example, `NodeProject` delegates this to `.npmignore`.
+
+###### `_pattern`<sup>Required</sup> <a name="_pattern" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addPackageIgnore.parameter._pattern"></a>
+
+- *Type:* string
+
+The glob pattern to exclude.
+
+---
+
+##### `addTask` <a name="addTask" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addTask"></a>
+
+```typescript
+public addTask(name: string, props?: TaskOptions): Task
+```
+
+Adds a new task to this project.
+
+This will fail if the project already has
+a task with this name.
+
+###### `name`<sup>Required</sup> <a name="name" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addTask.parameter.name"></a>
+
+- *Type:* string
+
+The task name to add.
+
+---
+
+###### `props`<sup>Optional</sup> <a name="props" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addTask.parameter.props"></a>
+
+- *Type:* projen.TaskOptions
+
+Task properties.
+
+---
+
+##### ~~`addTip`~~ <a name="addTip" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addTip"></a>
+
+```typescript
+public addTip(message: string): void
+```
+
+Prints a "tip" message during synthesis.
+
+###### `message`<sup>Required</sup> <a name="message" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addTip.parameter.message"></a>
+
+- *Type:* string
+
+The message.
+
+---
+
+##### `annotateGenerated` <a name="annotateGenerated" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.annotateGenerated"></a>
+
+```typescript
+public annotateGenerated(glob: string): void
+```
+
+Marks the provided file(s) as being generated.
+
+This is achieved using the
+github-linguist attributes. Generated files do not count against the
+repository statistics and language breakdown.
+
+> [https://github.com/github/linguist/blob/master/docs/overrides.md](https://github.com/github/linguist/blob/master/docs/overrides.md)
+
+###### `glob`<sup>Required</sup> <a name="glob" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.annotateGenerated.parameter.glob"></a>
+
+- *Type:* string
+
+the glob pattern to match (could be a file path).
+
+---
+
+##### `postSynthesize` <a name="postSynthesize" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.postSynthesize"></a>
+
+```typescript
+public postSynthesize(): void
+```
+
+Called after all components are synthesized.
+
+Order is *not* guaranteed.
+
+##### `preSynthesize` <a name="preSynthesize" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.preSynthesize"></a>
+
+```typescript
+public preSynthesize(): void
+```
+
+Called before all components are synthesized.
+
+##### `removeTask` <a name="removeTask" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.removeTask"></a>
+
+```typescript
+public removeTask(name: string): Task
+```
+
+Removes a task from a project.
+
+###### `name`<sup>Required</sup> <a name="name" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.removeTask.parameter.name"></a>
+
+- *Type:* string
+
+The name of the task to remove.
+
+---
+
+##### `runTaskCommand` <a name="runTaskCommand" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.runTaskCommand"></a>
+
+```typescript
+public runTaskCommand(task: Task): string
+```
+
+Returns the shell command to execute in order to run a task.
+
+By default, this is `npx projen@<version> <task>`
+
+###### `task`<sup>Required</sup> <a name="task" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.runTaskCommand.parameter.task"></a>
+
+- *Type:* projen.Task
+
+The task for which the command is required.
+
+---
+
+##### `synth` <a name="synth" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.synth"></a>
+
+```typescript
+public synth(): void
+```
+
+Synthesize all project files into `outdir`.
+
+1. Call "this.preSynthesize()"
+2. Delete all generated files
+3. Synthesize all subprojects
+4. Synthesize all components of this project
+5. Call "postSynthesize()" for all components of this project
+6. Call "this.postSynthesize()"
+
+##### `tryFindFile` <a name="tryFindFile" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.tryFindFile"></a>
+
+```typescript
+public tryFindFile(filePath: string): FileBase
+```
+
+Finds a file at the specified relative path within this project and all its subprojects.
+
+###### `filePath`<sup>Required</sup> <a name="filePath" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.tryFindFile.parameter.filePath"></a>
+
+- *Type:* string
+
+The file path.
+
+If this path is relative, it will be resolved
+from the root of _this_ project.
+
+---
+
+##### ~~`tryFindJsonFile`~~ <a name="tryFindJsonFile" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.tryFindJsonFile"></a>
+
+```typescript
+public tryFindJsonFile(filePath: string): JsonFile
+```
+
+Finds a json file by name.
+
+###### `filePath`<sup>Required</sup> <a name="filePath" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.tryFindJsonFile.parameter.filePath"></a>
+
+- *Type:* string
+
+The file path.
+
+---
+
+##### `tryFindObjectFile` <a name="tryFindObjectFile" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.tryFindObjectFile"></a>
+
+```typescript
+public tryFindObjectFile(filePath: string): ObjectFile
+```
+
+Finds an object file (like JsonFile, YamlFile, etc.) by name.
+
+###### `filePath`<sup>Required</sup> <a name="filePath" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.tryFindObjectFile.parameter.filePath"></a>
+
+- *Type:* string
+
+The file path.
+
+---
+
+##### `tryRemoveFile` <a name="tryRemoveFile" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.tryRemoveFile"></a>
+
+```typescript
+public tryRemoveFile(filePath: string): FileBase
+```
+
+Finds a file at the specified relative path within this project and removes it.
+
+###### `filePath`<sup>Required</sup> <a name="filePath" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.tryRemoveFile.parameter.filePath"></a>
+
+- *Type:* string
+
+The file path.
+
+If this path is relative, it will be
+resolved from the root of _this_ project.
+
+---
+
+##### `addPythonGitIgnore` <a name="addPythonGitIgnore" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addPythonGitIgnore"></a>
+
+```typescript
+public addPythonGitIgnore(): void
+```
+
+##### `createDevBranch` <a name="createDevBranch" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.createDevBranch"></a>
+
+```typescript
+public createDevBranch(): void
+```
+
+Create a dev branch if it doesn't already exist, and set it as the default branch.
+
+##### `createGenericSkillCode` <a name="createGenericSkillCode" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.createGenericSkillCode"></a>
+
+```typescript
+public createGenericSkillCode(dir: string): void
+```
+
+Create a generic skill with sample code.
+
+*Example*
+
+```typescript
+"neon_phal_plugin_audio_receiver"
+```
+
+
+###### `dir`<sup>Required</sup> <a name="dir" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.createGenericSkillCode.parameter.dir"></a>
+
+- *Type:* string
+
+The name of the directory to create sample code in.
+
+---
+
+#### Static Functions <a name="Static Functions" id="Static Functions"></a>
+
+| **Name** | **Description** |
+| --- | --- |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.isConstruct">isConstruct</a></code> | Checks if `x` is a construct. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.isProject">isProject</a></code> | Test whether the given construct is a project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.of">of</a></code> | Find the closest ancestor project for given construct. |
+
+---
+
+##### `isConstruct` <a name="isConstruct" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.isConstruct"></a>
+
+```typescript
+import { OVOSPHALProject } from '@mikejgray/ovos-skill-projen'
+
+OVOSPHALProject.isConstruct(x: any)
+```
+
+Checks if `x` is a construct.
+
+Use this method instead of `instanceof` to properly detect `Construct`
+instances, even when the construct library is symlinked.
+
+Explanation: in JavaScript, multiple copies of the `constructs` library on
+disk are seen as independent, completely different libraries. As a
+consequence, the class `Construct` in each copy of the `constructs` library
+is seen as a different class, and an instance of one class will not test as
+`instanceof` the other class. `npm install` will not create installations
+like this, but users may manually symlink construct libraries together or
+use a monorepo tool: in those cases, multiple copies of the `constructs`
+library can be accidentally installed, and `instanceof` will behave
+unpredictably. It is safest to avoid using `instanceof`, and using
+this type-testing method instead.
+
+###### `x`<sup>Required</sup> <a name="x" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.isConstruct.parameter.x"></a>
+
+- *Type:* any
+
+Any object.
+
+---
+
+##### `isProject` <a name="isProject" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.isProject"></a>
+
+```typescript
+import { OVOSPHALProject } from '@mikejgray/ovos-skill-projen'
+
+OVOSPHALProject.isProject(x: any)
+```
+
+Test whether the given construct is a project.
+
+###### `x`<sup>Required</sup> <a name="x" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.isProject.parameter.x"></a>
+
+- *Type:* any
+
+---
+
+##### `of` <a name="of" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.of"></a>
+
+```typescript
+import { OVOSPHALProject } from '@mikejgray/ovos-skill-projen'
+
+OVOSPHALProject.of(construct: IConstruct)
+```
+
+Find the closest ancestor project for given construct.
+
+When given a project, this it the project itself.
+
+###### `construct`<sup>Required</sup> <a name="construct" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.of.parameter.construct"></a>
+
+- *Type:* constructs.IConstruct
+
+---
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.node">node</a></code> | <code>constructs.Node</code> | The tree node. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.buildTask">buildTask</a></code> | <code>projen.Task</code> | *No description.* |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.commitGenerated">commitGenerated</a></code> | <code>boolean</code> | Whether to commit the managed files by default. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.compileTask">compileTask</a></code> | <code>projen.Task</code> | *No description.* |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.components">components</a></code> | <code>projen.Component[]</code> | Returns all the components within this project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.deps">deps</a></code> | <code>projen.Dependencies</code> | Project dependencies. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.ejected">ejected</a></code> | <code>boolean</code> | Whether or not the project is being ejected. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.files">files</a></code> | <code>projen.FileBase[]</code> | All files in this project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.gitattributes">gitattributes</a></code> | <code>projen.GitAttributesFile</code> | The .gitattributes file for this repository. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.gitignore">gitignore</a></code> | <code>projen.IgnoreFile</code> | .gitignore. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.logger">logger</a></code> | <code>projen.Logger</code> | Logging utilities. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.name">name</a></code> | <code>string</code> | Project name. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.outdir">outdir</a></code> | <code>string</code> | Absolute output directory of this project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.packageTask">packageTask</a></code> | <code>projen.Task</code> | *No description.* |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.postCompileTask">postCompileTask</a></code> | <code>projen.Task</code> | *No description.* |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.preCompileTask">preCompileTask</a></code> | <code>projen.Task</code> | *No description.* |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.projectBuild">projectBuild</a></code> | <code>projen.ProjectBuild</code> | Manages the build process of the project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.projenCommand">projenCommand</a></code> | <code>string</code> | The command to use in order to run the projen CLI. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.root">root</a></code> | <code>projen.Project</code> | The root project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.subprojects">subprojects</a></code> | <code>projen.Project[]</code> | Returns all the subprojects within this project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.tasks">tasks</a></code> | <code>projen.Tasks</code> | Project tasks. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.testTask">testTask</a></code> | <code>projen.Task</code> | *No description.* |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.defaultTask">defaultTask</a></code> | <code>projen.Task</code> | This is the "default" task, the one that executes "projen". |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.initProject">initProject</a></code> | <code>projen.InitProject</code> | The options used when this project is bootstrapped via `projen new`. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.parent">parent</a></code> | <code>projen.Project</code> | A parent project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.projectType">projectType</a></code> | <code>projen.ProjectType</code> | *No description.* |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.autoApprove">autoApprove</a></code> | <code>projen.github.AutoApprove</code> | Auto approve set up for this project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.devContainer">devContainer</a></code> | <code>projen.vscode.DevContainer</code> | Access for .devcontainer.json (used for GitHub Codespaces). |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.github">github</a></code> | <code>projen.github.GitHub</code> | Access all github components. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.gitpod">gitpod</a></code> | <code>projen.Gitpod</code> | Access for Gitpod. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.vscode">vscode</a></code> | <code>projen.vscode.VsCode</code> | Access all VSCode components. |
+
+---
+
+##### `node`<sup>Required</sup> <a name="node" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.node"></a>
+
+```typescript
+public readonly node: Node;
+```
+
+- *Type:* constructs.Node
+
+The tree node.
+
+---
+
+##### `buildTask`<sup>Required</sup> <a name="buildTask" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.buildTask"></a>
+
+```typescript
+public readonly buildTask: Task;
+```
+
+- *Type:* projen.Task
+
+---
+
+##### `commitGenerated`<sup>Required</sup> <a name="commitGenerated" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.commitGenerated"></a>
+
+```typescript
+public readonly commitGenerated: boolean;
+```
+
+- *Type:* boolean
+
+Whether to commit the managed files by default.
+
+---
+
+##### `compileTask`<sup>Required</sup> <a name="compileTask" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.compileTask"></a>
+
+```typescript
+public readonly compileTask: Task;
+```
+
+- *Type:* projen.Task
+
+---
+
+##### `components`<sup>Required</sup> <a name="components" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.components"></a>
+
+```typescript
+public readonly components: Component[];
+```
+
+- *Type:* projen.Component[]
+
+Returns all the components within this project.
+
+---
+
+##### `deps`<sup>Required</sup> <a name="deps" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.deps"></a>
+
+```typescript
+public readonly deps: Dependencies;
+```
+
+- *Type:* projen.Dependencies
+
+Project dependencies.
+
+---
+
+##### `ejected`<sup>Required</sup> <a name="ejected" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.ejected"></a>
+
+```typescript
+public readonly ejected: boolean;
+```
+
+- *Type:* boolean
+
+Whether or not the project is being ejected.
+
+---
+
+##### `files`<sup>Required</sup> <a name="files" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.files"></a>
+
+```typescript
+public readonly files: FileBase[];
+```
+
+- *Type:* projen.FileBase[]
+
+All files in this project.
+
+---
+
+##### `gitattributes`<sup>Required</sup> <a name="gitattributes" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.gitattributes"></a>
+
+```typescript
+public readonly gitattributes: GitAttributesFile;
+```
+
+- *Type:* projen.GitAttributesFile
+
+The .gitattributes file for this repository.
+
+---
+
+##### `gitignore`<sup>Required</sup> <a name="gitignore" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.gitignore"></a>
+
+```typescript
+public readonly gitignore: IgnoreFile;
+```
+
+- *Type:* projen.IgnoreFile
+
+.gitignore.
+
+---
+
+##### `logger`<sup>Required</sup> <a name="logger" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.logger"></a>
+
+```typescript
+public readonly logger: Logger;
+```
+
+- *Type:* projen.Logger
+
+Logging utilities.
+
+---
+
+##### `name`<sup>Required</sup> <a name="name" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.name"></a>
+
+```typescript
+public readonly name: string;
+```
+
+- *Type:* string
+
+Project name.
+
+---
+
+##### `outdir`<sup>Required</sup> <a name="outdir" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.outdir"></a>
+
+```typescript
+public readonly outdir: string;
+```
+
+- *Type:* string
+
+Absolute output directory of this project.
+
+---
+
+##### `packageTask`<sup>Required</sup> <a name="packageTask" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.packageTask"></a>
+
+```typescript
+public readonly packageTask: Task;
+```
+
+- *Type:* projen.Task
+
+---
+
+##### `postCompileTask`<sup>Required</sup> <a name="postCompileTask" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.postCompileTask"></a>
+
+```typescript
+public readonly postCompileTask: Task;
+```
+
+- *Type:* projen.Task
+
+---
+
+##### `preCompileTask`<sup>Required</sup> <a name="preCompileTask" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.preCompileTask"></a>
+
+```typescript
+public readonly preCompileTask: Task;
+```
+
+- *Type:* projen.Task
+
+---
+
+##### `projectBuild`<sup>Required</sup> <a name="projectBuild" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.projectBuild"></a>
+
+```typescript
+public readonly projectBuild: ProjectBuild;
+```
+
+- *Type:* projen.ProjectBuild
+
+Manages the build process of the project.
+
+---
+
+##### `projenCommand`<sup>Required</sup> <a name="projenCommand" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.projenCommand"></a>
+
+```typescript
+public readonly projenCommand: string;
+```
+
+- *Type:* string
+
+The command to use in order to run the projen CLI.
+
+---
+
+##### `root`<sup>Required</sup> <a name="root" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.root"></a>
+
+```typescript
+public readonly root: Project;
+```
+
+- *Type:* projen.Project
+
+The root project.
+
+---
+
+##### `subprojects`<sup>Required</sup> <a name="subprojects" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.subprojects"></a>
+
+```typescript
+public readonly subprojects: Project[];
+```
+
+- *Type:* projen.Project[]
+
+Returns all the subprojects within this project.
+
+---
+
+##### `tasks`<sup>Required</sup> <a name="tasks" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.tasks"></a>
+
+```typescript
+public readonly tasks: Tasks;
+```
+
+- *Type:* projen.Tasks
+
+Project tasks.
+
+---
+
+##### `testTask`<sup>Required</sup> <a name="testTask" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.testTask"></a>
+
+```typescript
+public readonly testTask: Task;
+```
+
+- *Type:* projen.Task
+
+---
+
+##### `defaultTask`<sup>Optional</sup> <a name="defaultTask" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.defaultTask"></a>
+
+```typescript
+public readonly defaultTask: Task;
+```
+
+- *Type:* projen.Task
+
+This is the "default" task, the one that executes "projen".
+
+Undefined if
+the project is being ejected.
+
+---
+
+##### `initProject`<sup>Optional</sup> <a name="initProject" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.initProject"></a>
+
+```typescript
+public readonly initProject: InitProject;
+```
+
+- *Type:* projen.InitProject
+
+The options used when this project is bootstrapped via `projen new`.
+
+It
+includes the original set of options passed to the CLI and also the JSII
+FQN of the project type.
+
+---
+
+##### `parent`<sup>Optional</sup> <a name="parent" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.parent"></a>
+
+```typescript
+public readonly parent: Project;
+```
+
+- *Type:* projen.Project
+
+A parent project.
+
+If undefined, this is the root project.
+
+---
+
+##### `projectType`<sup>Required</sup> <a name="projectType" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.projectType"></a>
+
+```typescript
+public readonly projectType: ProjectType;
+```
+
+- *Type:* projen.ProjectType
+
+---
+
+##### `autoApprove`<sup>Optional</sup> <a name="autoApprove" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.autoApprove"></a>
+
+```typescript
+public readonly autoApprove: AutoApprove;
+```
+
+- *Type:* projen.github.AutoApprove
+
+Auto approve set up for this project.
+
+---
+
+##### `devContainer`<sup>Optional</sup> <a name="devContainer" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.devContainer"></a>
+
+```typescript
+public readonly devContainer: DevContainer;
+```
+
+- *Type:* projen.vscode.DevContainer
+
+Access for .devcontainer.json (used for GitHub Codespaces).
+
+This will be `undefined` if devContainer boolean is false
+
+---
+
+##### `github`<sup>Optional</sup> <a name="github" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.github"></a>
+
+```typescript
+public readonly github: GitHub;
+```
+
+- *Type:* projen.github.GitHub
+
+Access all github components.
+
+This will be `undefined` for subprojects.
+
+---
+
+##### `gitpod`<sup>Optional</sup> <a name="gitpod" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.gitpod"></a>
+
+```typescript
+public readonly gitpod: Gitpod;
+```
+
+- *Type:* projen.Gitpod
+
+Access for Gitpod.
+
+This will be `undefined` if gitpod boolean is false
+
+---
+
+##### `vscode`<sup>Optional</sup> <a name="vscode" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.vscode"></a>
+
+```typescript
+public readonly vscode: VsCode;
+```
+
+- *Type:* projen.vscode.VsCode
+
+Access all VSCode components.
+
+This will be `undefined` for subprojects.
+
+---
+
+#### Constants <a name="Constants" id="Constants"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.DEFAULT_TASK">DEFAULT_TASK</a></code> | <code>string</code> | The name of the default task (the task executed when `projen` is run without arguments). |
+
+---
+
+##### `DEFAULT_TASK`<sup>Required</sup> <a name="DEFAULT_TASK" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.DEFAULT_TASK"></a>
+
+```typescript
+public readonly DEFAULT_TASK: string;
+```
+
+- *Type:* string
+
+The name of the default task (the task executed when `projen` is run without arguments).
+
+Normally
+this task should synthesize the project files.
+
+---
+
+### OVOSSkillProject <a name="OVOSSkillProject" id="@mikejgray/ovos-skill-projen.OVOSSkillProject"></a>
+
+#### Initializers <a name="Initializers" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.Initializer"></a>
+
+```typescript
+import { OVOSSkillProject } from '@mikejgray/ovos-skill-projen'
+
+new OVOSSkillProject(options: OVOSSkillProjectOptions)
+```
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.Initializer.parameter.options">options</a></code> | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions">OVOSSkillProjectOptions</a></code> | *No description.* |
+
+---
+
+##### `options`<sup>Required</sup> <a name="options" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.Initializer.parameter.options"></a>
+
+- *Type:* <a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions">OVOSSkillProjectOptions</a>
+
+---
+
+#### Methods <a name="Methods" id="Methods"></a>
+
+| **Name** | **Description** |
+| --- | --- |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.toString">toString</a></code> | Returns a string representation of this construct. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.addExcludeFromCleanup">addExcludeFromCleanup</a></code> | Exclude the matching files from pre-synth cleanup. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.addGitIgnore">addGitIgnore</a></code> | Adds a .gitignore pattern. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.addPackageIgnore">addPackageIgnore</a></code> | Exclude these files from the bundled package. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.addTask">addTask</a></code> | Adds a new task to this project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.addTip">addTip</a></code> | Prints a "tip" message during synthesis. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.annotateGenerated">annotateGenerated</a></code> | Marks the provided file(s) as being generated. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.postSynthesize">postSynthesize</a></code> | Called after all components are synthesized. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.preSynthesize">preSynthesize</a></code> | Called before all components are synthesized. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.removeTask">removeTask</a></code> | Removes a task from a project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.runTaskCommand">runTaskCommand</a></code> | Returns the shell command to execute in order to run a task. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.synth">synth</a></code> | Synthesize all project files into `outdir`. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindFile">tryFindFile</a></code> | Finds a file at the specified relative path within this project and all its subprojects. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindJsonFile">tryFindJsonFile</a></code> | Finds a json file by name. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindObjectFile">tryFindObjectFile</a></code> | Finds an object file (like JsonFile, YamlFile, etc.) by name. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.tryRemoveFile">tryRemoveFile</a></code> | Finds a file at the specified relative path within this project and removes it. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.addPythonGitIgnore">addPythonGitIgnore</a></code> | Add a Python .gitignore file. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createDevBranch">createDevBranch</a></code> | Create a dev branch if it doesn't already exist, and set it as the default branch. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createGenericSkillCode">createGenericSkillCode</a></code> | Create a generic skill with sample code. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createGithubWorkflows">createGithubWorkflows</a></code> | Create OVOS standard Github Actions workflows. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.restructureLocaleFolders">restructureLocaleFolders</a></code> | Restructure locale folders to be more OVOS-like. |
+
+---
+
+##### `toString` <a name="toString" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.toString"></a>
+
+```typescript
+public toString(): string
+```
+
+Returns a string representation of this construct.
+
+##### `addExcludeFromCleanup` <a name="addExcludeFromCleanup" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addExcludeFromCleanup"></a>
+
+```typescript
+public addExcludeFromCleanup(globs: ...string[]): void
+```
+
+Exclude the matching files from pre-synth cleanup.
+
+Can be used when, for example, some
+source files include the projen marker and we don't want them to be erased during synth.
+
+###### `globs`<sup>Required</sup> <a name="globs" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addExcludeFromCleanup.parameter.globs"></a>
+
+- *Type:* ...string[]
+
+The glob patterns to match.
+
+---
+
+##### `addGitIgnore` <a name="addGitIgnore" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addGitIgnore"></a>
+
+```typescript
+public addGitIgnore(pattern: string): void
+```
+
+Adds a .gitignore pattern.
+
+###### `pattern`<sup>Required</sup> <a name="pattern" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addGitIgnore.parameter.pattern"></a>
+
+- *Type:* string
+
+The glob pattern to ignore.
+
+---
+
+##### `addPackageIgnore` <a name="addPackageIgnore" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addPackageIgnore"></a>
+
+```typescript
+public addPackageIgnore(_pattern: string): void
+```
+
+Exclude these files from the bundled package.
+
+Implemented by project types based on the
+packaging mechanism. For example, `NodeProject` delegates this to `.npmignore`.
+
+###### `_pattern`<sup>Required</sup> <a name="_pattern" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addPackageIgnore.parameter._pattern"></a>
+
+- *Type:* string
+
+The glob pattern to exclude.
+
+---
+
+##### `addTask` <a name="addTask" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addTask"></a>
+
+```typescript
+public addTask(name: string, props?: TaskOptions): Task
+```
+
+Adds a new task to this project.
+
+This will fail if the project already has
+a task with this name.
+
+###### `name`<sup>Required</sup> <a name="name" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addTask.parameter.name"></a>
+
+- *Type:* string
+
+The task name to add.
+
+---
+
+###### `props`<sup>Optional</sup> <a name="props" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addTask.parameter.props"></a>
+
+- *Type:* projen.TaskOptions
+
+Task properties.
+
+---
+
+##### ~~`addTip`~~ <a name="addTip" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addTip"></a>
+
+```typescript
+public addTip(message: string): void
+```
+
+Prints a "tip" message during synthesis.
+
+###### `message`<sup>Required</sup> <a name="message" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addTip.parameter.message"></a>
+
+- *Type:* string
+
+The message.
+
+---
+
+##### `annotateGenerated` <a name="annotateGenerated" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.annotateGenerated"></a>
+
+```typescript
+public annotateGenerated(glob: string): void
+```
+
+Marks the provided file(s) as being generated.
+
+This is achieved using the
+github-linguist attributes. Generated files do not count against the
+repository statistics and language breakdown.
+
+> [https://github.com/github/linguist/blob/master/docs/overrides.md](https://github.com/github/linguist/blob/master/docs/overrides.md)
+
+###### `glob`<sup>Required</sup> <a name="glob" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.annotateGenerated.parameter.glob"></a>
+
+- *Type:* string
+
+the glob pattern to match (could be a file path).
+
+---
+
+##### `postSynthesize` <a name="postSynthesize" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.postSynthesize"></a>
+
+```typescript
+public postSynthesize(): void
+```
+
+Called after all components are synthesized.
+
+Order is *not* guaranteed.
+
+##### `preSynthesize` <a name="preSynthesize" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.preSynthesize"></a>
+
+```typescript
+public preSynthesize(): void
+```
+
+Called before all components are synthesized.
+
+##### `removeTask` <a name="removeTask" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.removeTask"></a>
+
+```typescript
+public removeTask(name: string): Task
+```
+
+Removes a task from a project.
+
+###### `name`<sup>Required</sup> <a name="name" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.removeTask.parameter.name"></a>
+
+- *Type:* string
+
+The name of the task to remove.
+
+---
+
+##### `runTaskCommand` <a name="runTaskCommand" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.runTaskCommand"></a>
+
+```typescript
+public runTaskCommand(task: Task): string
+```
+
+Returns the shell command to execute in order to run a task.
+
+By default, this is `npx projen@<version> <task>`
+
+###### `task`<sup>Required</sup> <a name="task" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.runTaskCommand.parameter.task"></a>
+
+- *Type:* projen.Task
+
+The task for which the command is required.
+
+---
+
+##### `synth` <a name="synth" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.synth"></a>
+
+```typescript
+public synth(): void
+```
+
+Synthesize all project files into `outdir`.
+
+1. Call "this.preSynthesize()"
+2. Delete all generated files
+3. Synthesize all subprojects
+4. Synthesize all components of this project
+5. Call "postSynthesize()" for all components of this project
+6. Call "this.postSynthesize()"
+
+##### `tryFindFile` <a name="tryFindFile" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindFile"></a>
+
+```typescript
+public tryFindFile(filePath: string): FileBase
+```
+
+Finds a file at the specified relative path within this project and all its subprojects.
+
+###### `filePath`<sup>Required</sup> <a name="filePath" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindFile.parameter.filePath"></a>
+
+- *Type:* string
+
+The file path.
+
+If this path is relative, it will be resolved
+from the root of _this_ project.
+
+---
+
+##### ~~`tryFindJsonFile`~~ <a name="tryFindJsonFile" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindJsonFile"></a>
+
+```typescript
+public tryFindJsonFile(filePath: string): JsonFile
+```
+
+Finds a json file by name.
+
+###### `filePath`<sup>Required</sup> <a name="filePath" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindJsonFile.parameter.filePath"></a>
+
+- *Type:* string
+
+The file path.
+
+---
+
+##### `tryFindObjectFile` <a name="tryFindObjectFile" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindObjectFile"></a>
+
+```typescript
+public tryFindObjectFile(filePath: string): ObjectFile
+```
+
+Finds an object file (like JsonFile, YamlFile, etc.) by name.
+
+###### `filePath`<sup>Required</sup> <a name="filePath" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindObjectFile.parameter.filePath"></a>
+
+- *Type:* string
+
+The file path.
+
+---
+
+##### `tryRemoveFile` <a name="tryRemoveFile" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.tryRemoveFile"></a>
+
+```typescript
+public tryRemoveFile(filePath: string): FileBase
+```
+
+Finds a file at the specified relative path within this project and removes it.
+
+###### `filePath`<sup>Required</sup> <a name="filePath" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.tryRemoveFile.parameter.filePath"></a>
+
+- *Type:* string
+
+The file path.
+
+If this path is relative, it will be
+resolved from the root of _this_ project.
+
+---
+
+##### `addPythonGitIgnore` <a name="addPythonGitIgnore" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addPythonGitIgnore"></a>
+
+```typescript
+public addPythonGitIgnore(): void
+```
+
+Add a Python .gitignore file.
+
+##### `createDevBranch` <a name="createDevBranch" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createDevBranch"></a>
+
+```typescript
+public createDevBranch(): void
+```
+
+Create a dev branch if it doesn't already exist, and set it as the default branch.
+
+##### `createGenericSkillCode` <a name="createGenericSkillCode" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createGenericSkillCode"></a>
+
+```typescript
+public createGenericSkillCode(dir: string): void
+```
+
+Create a generic skill with sample code.
+
+*Example*
+
+```typescript
+"hello_world_skill"
+```
+
+
+###### `dir`<sup>Required</sup> <a name="dir" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createGenericSkillCode.parameter.dir"></a>
+
+- *Type:* string
+
+The name of the directory to create sample code in.
+
+---
+
+##### `createGithubWorkflows` <a name="createGithubWorkflows" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createGithubWorkflows"></a>
+
+```typescript
+public createGithubWorkflows(skillLicenseTest: boolean): void
+```
+
+Create OVOS standard Github Actions workflows.
+
+###### `skillLicenseTest`<sup>Required</sup> <a name="skillLicenseTest" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createGithubWorkflows.parameter.skillLicenseTest"></a>
+
+- *Type:* boolean
+
+---
+
+##### `restructureLocaleFolders` <a name="restructureLocaleFolders" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.restructureLocaleFolders"></a>
+
+```typescript
+public restructureLocaleFolders(sourceFolder: string): void
+```
+
+Restructure locale folders to be more OVOS-like.
+
+###### `sourceFolder`<sup>Required</sup> <a name="sourceFolder" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.restructureLocaleFolders.parameter.sourceFolder"></a>
+
+- *Type:* string
+
+The name of the directory containing the Mycroft skill's code.
+
+---
+
+#### Static Functions <a name="Static Functions" id="Static Functions"></a>
+
+| **Name** | **Description** |
+| --- | --- |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.isConstruct">isConstruct</a></code> | Checks if `x` is a construct. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.isProject">isProject</a></code> | Test whether the given construct is a project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.of">of</a></code> | Find the closest ancestor project for given construct. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.modernizeSkillCode">modernizeSkillCode</a></code> | Load a Mycroft skill Python file and modernize it for OVOS. |
+
+---
+
+##### `isConstruct` <a name="isConstruct" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.isConstruct"></a>
+
+```typescript
+import { OVOSSkillProject } from '@mikejgray/ovos-skill-projen'
+
+OVOSSkillProject.isConstruct(x: any)
+```
+
+Checks if `x` is a construct.
+
+Use this method instead of `instanceof` to properly detect `Construct`
+instances, even when the construct library is symlinked.
+
+Explanation: in JavaScript, multiple copies of the `constructs` library on
+disk are seen as independent, completely different libraries. As a
+consequence, the class `Construct` in each copy of the `constructs` library
+is seen as a different class, and an instance of one class will not test as
+`instanceof` the other class. `npm install` will not create installations
+like this, but users may manually symlink construct libraries together or
+use a monorepo tool: in those cases, multiple copies of the `constructs`
+library can be accidentally installed, and `instanceof` will behave
+unpredictably. It is safest to avoid using `instanceof`, and using
+this type-testing method instead.
+
+###### `x`<sup>Required</sup> <a name="x" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.isConstruct.parameter.x"></a>
+
+- *Type:* any
+
+Any object.
+
+---
+
+##### `isProject` <a name="isProject" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.isProject"></a>
+
+```typescript
+import { OVOSSkillProject } from '@mikejgray/ovos-skill-projen'
+
+OVOSSkillProject.isProject(x: any)
+```
+
+Test whether the given construct is a project.
+
+###### `x`<sup>Required</sup> <a name="x" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.isProject.parameter.x"></a>
+
+- *Type:* any
+
+---
+
+##### `of` <a name="of" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.of"></a>
+
+```typescript
+import { OVOSSkillProject } from '@mikejgray/ovos-skill-projen'
+
+OVOSSkillProject.of(construct: IConstruct)
+```
+
+Find the closest ancestor project for given construct.
+
+When given a project, this it the project itself.
+
+###### `construct`<sup>Required</sup> <a name="construct" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.of.parameter.construct"></a>
+
+- *Type:* constructs.IConstruct
+
+---
+
+##### `modernizeSkillCode` <a name="modernizeSkillCode" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.modernizeSkillCode"></a>
+
+```typescript
+import { OVOSSkillProject } from '@mikejgray/ovos-skill-projen'
+
+OVOSSkillProject.modernizeSkillCode(file: string)
+```
+
+Load a Mycroft skill Python file and modernize it for OVOS.
+
+###### `file`<sup>Required</sup> <a name="file" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.modernizeSkillCode.parameter.file"></a>
+
+- *Type:* string
+
+The file to modernize.
+
+---
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.node">node</a></code> | <code>constructs.Node</code> | The tree node. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.buildTask">buildTask</a></code> | <code>projen.Task</code> | *No description.* |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.commitGenerated">commitGenerated</a></code> | <code>boolean</code> | Whether to commit the managed files by default. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.compileTask">compileTask</a></code> | <code>projen.Task</code> | *No description.* |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.components">components</a></code> | <code>projen.Component[]</code> | Returns all the components within this project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.deps">deps</a></code> | <code>projen.Dependencies</code> | Project dependencies. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.ejected">ejected</a></code> | <code>boolean</code> | Whether or not the project is being ejected. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.files">files</a></code> | <code>projen.FileBase[]</code> | All files in this project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.gitattributes">gitattributes</a></code> | <code>projen.GitAttributesFile</code> | The .gitattributes file for this repository. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.gitignore">gitignore</a></code> | <code>projen.IgnoreFile</code> | .gitignore. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.logger">logger</a></code> | <code>projen.Logger</code> | Logging utilities. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.name">name</a></code> | <code>string</code> | Project name. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.outdir">outdir</a></code> | <code>string</code> | Absolute output directory of this project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.packageTask">packageTask</a></code> | <code>projen.Task</code> | *No description.* |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.postCompileTask">postCompileTask</a></code> | <code>projen.Task</code> | *No description.* |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.preCompileTask">preCompileTask</a></code> | <code>projen.Task</code> | *No description.* |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.projectBuild">projectBuild</a></code> | <code>projen.ProjectBuild</code> | Manages the build process of the project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.projenCommand">projenCommand</a></code> | <code>string</code> | The command to use in order to run the projen CLI. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.root">root</a></code> | <code>projen.Project</code> | The root project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.subprojects">subprojects</a></code> | <code>projen.Project[]</code> | Returns all the subprojects within this project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.tasks">tasks</a></code> | <code>projen.Tasks</code> | Project tasks. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.testTask">testTask</a></code> | <code>projen.Task</code> | *No description.* |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.defaultTask">defaultTask</a></code> | <code>projen.Task</code> | This is the "default" task, the one that executes "projen". |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.initProject">initProject</a></code> | <code>projen.InitProject</code> | The options used when this project is bootstrapped via `projen new`. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.parent">parent</a></code> | <code>projen.Project</code> | A parent project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.projectType">projectType</a></code> | <code>projen.ProjectType</code> | *No description.* |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.autoApprove">autoApprove</a></code> | <code>projen.github.AutoApprove</code> | Auto approve set up for this project. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.devContainer">devContainer</a></code> | <code>projen.vscode.DevContainer</code> | Access for .devcontainer.json (used for GitHub Codespaces). |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.github">github</a></code> | <code>projen.github.GitHub</code> | Access all github components. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.gitpod">gitpod</a></code> | <code>projen.Gitpod</code> | Access for Gitpod. |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.vscode">vscode</a></code> | <code>projen.vscode.VsCode</code> | Access all VSCode components. |
+
+---
+
+##### `node`<sup>Required</sup> <a name="node" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.node"></a>
+
+```typescript
+public readonly node: Node;
+```
+
+- *Type:* constructs.Node
+
+The tree node.
+
+---
+
+##### `buildTask`<sup>Required</sup> <a name="buildTask" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.buildTask"></a>
+
+```typescript
+public readonly buildTask: Task;
+```
+
+- *Type:* projen.Task
+
+---
+
+##### `commitGenerated`<sup>Required</sup> <a name="commitGenerated" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.commitGenerated"></a>
+
+```typescript
+public readonly commitGenerated: boolean;
+```
+
+- *Type:* boolean
+
+Whether to commit the managed files by default.
+
+---
+
+##### `compileTask`<sup>Required</sup> <a name="compileTask" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.compileTask"></a>
+
+```typescript
+public readonly compileTask: Task;
+```
+
+- *Type:* projen.Task
+
+---
+
+##### `components`<sup>Required</sup> <a name="components" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.components"></a>
+
+```typescript
+public readonly components: Component[];
+```
+
+- *Type:* projen.Component[]
+
+Returns all the components within this project.
+
+---
+
+##### `deps`<sup>Required</sup> <a name="deps" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.deps"></a>
+
+```typescript
+public readonly deps: Dependencies;
+```
+
+- *Type:* projen.Dependencies
+
+Project dependencies.
+
+---
+
+##### `ejected`<sup>Required</sup> <a name="ejected" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.ejected"></a>
+
+```typescript
+public readonly ejected: boolean;
+```
+
+- *Type:* boolean
+
+Whether or not the project is being ejected.
+
+---
+
+##### `files`<sup>Required</sup> <a name="files" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.files"></a>
+
+```typescript
+public readonly files: FileBase[];
+```
+
+- *Type:* projen.FileBase[]
+
+All files in this project.
+
+---
+
+##### `gitattributes`<sup>Required</sup> <a name="gitattributes" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.gitattributes"></a>
+
+```typescript
+public readonly gitattributes: GitAttributesFile;
+```
+
+- *Type:* projen.GitAttributesFile
+
+The .gitattributes file for this repository.
+
+---
+
+##### `gitignore`<sup>Required</sup> <a name="gitignore" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.gitignore"></a>
+
+```typescript
+public readonly gitignore: IgnoreFile;
+```
+
+- *Type:* projen.IgnoreFile
+
+.gitignore.
+
+---
+
+##### `logger`<sup>Required</sup> <a name="logger" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.logger"></a>
+
+```typescript
+public readonly logger: Logger;
+```
+
+- *Type:* projen.Logger
+
+Logging utilities.
+
+---
+
+##### `name`<sup>Required</sup> <a name="name" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.name"></a>
+
+```typescript
+public readonly name: string;
+```
+
+- *Type:* string
+
+Project name.
+
+---
+
+##### `outdir`<sup>Required</sup> <a name="outdir" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.outdir"></a>
+
+```typescript
+public readonly outdir: string;
+```
+
+- *Type:* string
+
+Absolute output directory of this project.
+
+---
+
+##### `packageTask`<sup>Required</sup> <a name="packageTask" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.packageTask"></a>
+
+```typescript
+public readonly packageTask: Task;
+```
+
+- *Type:* projen.Task
+
+---
+
+##### `postCompileTask`<sup>Required</sup> <a name="postCompileTask" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.postCompileTask"></a>
+
+```typescript
+public readonly postCompileTask: Task;
+```
+
+- *Type:* projen.Task
+
+---
+
+##### `preCompileTask`<sup>Required</sup> <a name="preCompileTask" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.preCompileTask"></a>
+
+```typescript
+public readonly preCompileTask: Task;
+```
+
+- *Type:* projen.Task
+
+---
+
+##### `projectBuild`<sup>Required</sup> <a name="projectBuild" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.projectBuild"></a>
+
+```typescript
+public readonly projectBuild: ProjectBuild;
+```
+
+- *Type:* projen.ProjectBuild
+
+Manages the build process of the project.
+
+---
+
+##### `projenCommand`<sup>Required</sup> <a name="projenCommand" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.projenCommand"></a>
+
+```typescript
+public readonly projenCommand: string;
+```
+
+- *Type:* string
+
+The command to use in order to run the projen CLI.
+
+---
+
+##### `root`<sup>Required</sup> <a name="root" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.root"></a>
+
+```typescript
+public readonly root: Project;
+```
+
+- *Type:* projen.Project
+
+The root project.
+
+---
+
+##### `subprojects`<sup>Required</sup> <a name="subprojects" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.subprojects"></a>
+
+```typescript
+public readonly subprojects: Project[];
+```
+
+- *Type:* projen.Project[]
+
+Returns all the subprojects within this project.
+
+---
+
+##### `tasks`<sup>Required</sup> <a name="tasks" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.tasks"></a>
+
+```typescript
+public readonly tasks: Tasks;
+```
+
+- *Type:* projen.Tasks
+
+Project tasks.
+
+---
+
+##### `testTask`<sup>Required</sup> <a name="testTask" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.testTask"></a>
+
+```typescript
+public readonly testTask: Task;
+```
+
+- *Type:* projen.Task
+
+---
+
+##### `defaultTask`<sup>Optional</sup> <a name="defaultTask" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.defaultTask"></a>
+
+```typescript
+public readonly defaultTask: Task;
+```
+
+- *Type:* projen.Task
+
+This is the "default" task, the one that executes "projen".
+
+Undefined if
+the project is being ejected.
+
+---
+
+##### `initProject`<sup>Optional</sup> <a name="initProject" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.initProject"></a>
+
+```typescript
+public readonly initProject: InitProject;
+```
+
+- *Type:* projen.InitProject
+
+The options used when this project is bootstrapped via `projen new`.
+
+It
+includes the original set of options passed to the CLI and also the JSII
+FQN of the project type.
+
+---
+
+##### `parent`<sup>Optional</sup> <a name="parent" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.parent"></a>
+
+```typescript
+public readonly parent: Project;
+```
+
+- *Type:* projen.Project
+
+A parent project.
+
+If undefined, this is the root project.
+
+---
+
+##### `projectType`<sup>Required</sup> <a name="projectType" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.projectType"></a>
+
+```typescript
+public readonly projectType: ProjectType;
+```
+
+- *Type:* projen.ProjectType
+
+---
+
+##### `autoApprove`<sup>Optional</sup> <a name="autoApprove" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.autoApprove"></a>
+
+```typescript
+public readonly autoApprove: AutoApprove;
+```
+
+- *Type:* projen.github.AutoApprove
+
+Auto approve set up for this project.
+
+---
+
+##### `devContainer`<sup>Optional</sup> <a name="devContainer" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.devContainer"></a>
+
+```typescript
+public readonly devContainer: DevContainer;
+```
+
+- *Type:* projen.vscode.DevContainer
+
+Access for .devcontainer.json (used for GitHub Codespaces).
+
+This will be `undefined` if devContainer boolean is false
+
+---
+
+##### `github`<sup>Optional</sup> <a name="github" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.github"></a>
+
+```typescript
+public readonly github: GitHub;
+```
+
+- *Type:* projen.github.GitHub
+
+Access all github components.
+
+This will be `undefined` for subprojects.
+
+---
+
+##### `gitpod`<sup>Optional</sup> <a name="gitpod" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.gitpod"></a>
+
+```typescript
+public readonly gitpod: Gitpod;
+```
+
+- *Type:* projen.Gitpod
+
+Access for Gitpod.
+
+This will be `undefined` if gitpod boolean is false
+
+---
+
+##### `vscode`<sup>Optional</sup> <a name="vscode" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.vscode"></a>
+
+```typescript
+public readonly vscode: VsCode;
+```
+
+- *Type:* projen.vscode.VsCode
+
+Access all VSCode components.
+
+This will be `undefined` for subprojects.
+
+---
+
+#### Constants <a name="Constants" id="Constants"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.DEFAULT_TASK">DEFAULT_TASK</a></code> | <code>string</code> | The name of the default task (the task executed when `projen` is run without arguments). |
+
+---
+
+##### `DEFAULT_TASK`<sup>Required</sup> <a name="DEFAULT_TASK" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.DEFAULT_TASK"></a>
+
+```typescript
+public readonly DEFAULT_TASK: string;
+```
+
+- *Type:* string
+
+The name of the default task (the task executed when `projen` is run without arguments).
+
+Normally
+this task should synthesize the project files.
+
+---
 
 ## Structs <a name="Structs" id="Structs"></a>
 
@@ -251,7 +1919,7 @@ Relative to this directory, all files are synthesized.
 
 If this project has a parent, this directory is relative to the parent
 directory and it cannot be the same as the parent or any of it's other
-sub-projects.
+subprojects.
 
 ---
 
@@ -997,7 +2665,7 @@ Relative to this directory, all files are synthesized.
 
 If this project has a parent, this directory is relative to the parent
 directory and it cannot be the same as the parent or any of it's other
-sub-projects.
+subprojects.
 
 ---
 
@@ -1591,1593 +3259,5 @@ Include a test to check that the skill's license is FOSS?
 
 ---
 
-## Classes <a name="Classes" id="Classes"></a>
-
-### OVOSPHALProject <a name="OVOSPHALProject" id="@mikejgray/ovos-skill-projen.OVOSPHALProject"></a>
-
-#### Initializers <a name="Initializers" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.Initializer"></a>
-
-```typescript
-import { OVOSPHALProject } from '@mikejgray/ovos-skill-projen'
-
-new OVOSPHALProject(options: OVOSPHALProjectOptions)
-```
-
-| **Name** | **Type** | **Description** |
-| --- | --- | --- |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.Initializer.parameter.options">options</a></code> | <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProjectOptions">OVOSPHALProjectOptions</a></code> | *No description.* |
-
----
-
-##### `options`<sup>Required</sup> <a name="options" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.Initializer.parameter.options"></a>
-
-- *Type:* <a href="#@mikejgray/ovos-skill-projen.OVOSPHALProjectOptions">OVOSPHALProjectOptions</a>
-
----
-
-#### Methods <a name="Methods" id="Methods"></a>
-
-| **Name** | **Description** |
-| --- | --- |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.addExcludeFromCleanup">addExcludeFromCleanup</a></code> | Exclude the matching files from pre-synth cleanup. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.addGitIgnore">addGitIgnore</a></code> | Adds a .gitignore pattern. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.addPackageIgnore">addPackageIgnore</a></code> | Exclude these files from the bundled package. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.addTask">addTask</a></code> | Adds a new task to this project. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.addTip">addTip</a></code> | Prints a "tip" message during synthesis. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.annotateGenerated">annotateGenerated</a></code> | Marks the provided file(s) as being generated. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.postSynthesize">postSynthesize</a></code> | Called after all components are synthesized. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.preSynthesize">preSynthesize</a></code> | Called before all components are synthesized. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.removeTask">removeTask</a></code> | Removes a task from a project. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.runTaskCommand">runTaskCommand</a></code> | Returns the shell command to execute in order to run a task. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.synth">synth</a></code> | Synthesize all project files into `outdir`. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.tryFindFile">tryFindFile</a></code> | Finds a file at the specified relative path within this project and all its subprojects. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.tryFindJsonFile">tryFindJsonFile</a></code> | Finds a json file by name. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.tryFindObjectFile">tryFindObjectFile</a></code> | Finds an object file (like JsonFile, YamlFile, etc.) by name. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.tryRemoveFile">tryRemoveFile</a></code> | Finds a file at the specified relative path within this project and removes it. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.addPythonGitIgnore">addPythonGitIgnore</a></code> | *No description.* |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.createDevBranch">createDevBranch</a></code> | Create a dev branch if it doesn't already exist, and set it as the default branch. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.createGenericSkillCode">createGenericSkillCode</a></code> | Create a generic skill with sample code. |
-
----
-
-##### `addExcludeFromCleanup` <a name="addExcludeFromCleanup" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addExcludeFromCleanup"></a>
-
-```typescript
-public addExcludeFromCleanup(globs: string): void
-```
-
-Exclude the matching files from pre-synth cleanup.
-
-Can be used when, for example, some
-source files include the projen marker and we don't want them to be erased during synth.
-
-###### `globs`<sup>Required</sup> <a name="globs" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addExcludeFromCleanup.parameter.globs"></a>
-
-- *Type:* string
-
-The glob patterns to match.
-
----
-
-##### `addGitIgnore` <a name="addGitIgnore" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addGitIgnore"></a>
-
-```typescript
-public addGitIgnore(pattern: string): void
-```
-
-Adds a .gitignore pattern.
-
-###### `pattern`<sup>Required</sup> <a name="pattern" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addGitIgnore.parameter.pattern"></a>
-
-- *Type:* string
-
-The glob pattern to ignore.
-
----
-
-##### `addPackageIgnore` <a name="addPackageIgnore" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addPackageIgnore"></a>
-
-```typescript
-public addPackageIgnore(_pattern: string): void
-```
-
-Exclude these files from the bundled package.
-
-Implemented by project types based on the
-packaging mechanism. For example, `NodeProject` delegates this to `.npmignore`.
-
-###### `_pattern`<sup>Required</sup> <a name="_pattern" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addPackageIgnore.parameter._pattern"></a>
-
-- *Type:* string
-
-The glob pattern to exclude.
-
----
-
-##### `addTask` <a name="addTask" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addTask"></a>
-
-```typescript
-public addTask(name: string, props?: TaskOptions): Task
-```
-
-Adds a new task to this project.
-
-This will fail if the project already has
-a task with this name.
-
-###### `name`<sup>Required</sup> <a name="name" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addTask.parameter.name"></a>
-
-- *Type:* string
-
-The task name to add.
-
----
-
-###### `props`<sup>Optional</sup> <a name="props" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addTask.parameter.props"></a>
-
-- *Type:* projen.TaskOptions
-
-Task properties.
-
----
-
-##### ~~`addTip`~~ <a name="addTip" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addTip"></a>
-
-```typescript
-public addTip(message: string): void
-```
-
-Prints a "tip" message during synthesis.
-
-###### `message`<sup>Required</sup> <a name="message" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addTip.parameter.message"></a>
-
-- *Type:* string
-
-The message.
-
----
-
-##### `annotateGenerated` <a name="annotateGenerated" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.annotateGenerated"></a>
-
-```typescript
-public annotateGenerated(glob: string): void
-```
-
-Marks the provided file(s) as being generated.
-
-This is achieved using the
-github-linguist attributes. Generated files do not count against the
-repository statistics and language breakdown.
-
-> [https://github.com/github/linguist/blob/master/docs/overrides.md](https://github.com/github/linguist/blob/master/docs/overrides.md)
-
-###### `glob`<sup>Required</sup> <a name="glob" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.annotateGenerated.parameter.glob"></a>
-
-- *Type:* string
-
-the glob pattern to match (could be a file path).
-
----
-
-##### `postSynthesize` <a name="postSynthesize" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.postSynthesize"></a>
-
-```typescript
-public postSynthesize(): void
-```
-
-Called after all components are synthesized.
-
-Order is *not* guaranteed.
-
-##### `preSynthesize` <a name="preSynthesize" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.preSynthesize"></a>
-
-```typescript
-public preSynthesize(): void
-```
-
-Called before all components are synthesized.
-
-##### `removeTask` <a name="removeTask" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.removeTask"></a>
-
-```typescript
-public removeTask(name: string): Task
-```
-
-Removes a task from a project.
-
-###### `name`<sup>Required</sup> <a name="name" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.removeTask.parameter.name"></a>
-
-- *Type:* string
-
-The name of the task to remove.
-
----
-
-##### `runTaskCommand` <a name="runTaskCommand" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.runTaskCommand"></a>
-
-```typescript
-public runTaskCommand(task: Task): string
-```
-
-Returns the shell command to execute in order to run a task.
-
-By default, this is `npx projen@<version> <task>`
-
-###### `task`<sup>Required</sup> <a name="task" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.runTaskCommand.parameter.task"></a>
-
-- *Type:* projen.Task
-
-The task for which the command is required.
-
----
-
-##### `synth` <a name="synth" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.synth"></a>
-
-```typescript
-public synth(): void
-```
-
-Synthesize all project files into `outdir`.
-
-1. Call "this.preSynthesize()"
-2. Delete all generated files
-3. Synthesize all sub-projects
-4. Synthesize all components of this project
-5. Call "postSynthesize()" for all components of this project
-6. Call "this.postSynthesize()"
-
-##### `tryFindFile` <a name="tryFindFile" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.tryFindFile"></a>
-
-```typescript
-public tryFindFile(filePath: string): FileBase
-```
-
-Finds a file at the specified relative path within this project and all its subprojects.
-
-###### `filePath`<sup>Required</sup> <a name="filePath" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.tryFindFile.parameter.filePath"></a>
-
-- *Type:* string
-
-The file path.
-
-If this path is relative, it will be resolved
-from the root of _this_ project.
-
----
-
-##### ~~`tryFindJsonFile`~~ <a name="tryFindJsonFile" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.tryFindJsonFile"></a>
-
-```typescript
-public tryFindJsonFile(filePath: string): JsonFile
-```
-
-Finds a json file by name.
-
-###### `filePath`<sup>Required</sup> <a name="filePath" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.tryFindJsonFile.parameter.filePath"></a>
-
-- *Type:* string
-
-The file path.
-
----
-
-##### `tryFindObjectFile` <a name="tryFindObjectFile" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.tryFindObjectFile"></a>
-
-```typescript
-public tryFindObjectFile(filePath: string): ObjectFile
-```
-
-Finds an object file (like JsonFile, YamlFile, etc.) by name.
-
-###### `filePath`<sup>Required</sup> <a name="filePath" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.tryFindObjectFile.parameter.filePath"></a>
-
-- *Type:* string
-
-The file path.
-
----
-
-##### `tryRemoveFile` <a name="tryRemoveFile" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.tryRemoveFile"></a>
-
-```typescript
-public tryRemoveFile(filePath: string): FileBase
-```
-
-Finds a file at the specified relative path within this project and removes it.
-
-###### `filePath`<sup>Required</sup> <a name="filePath" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.tryRemoveFile.parameter.filePath"></a>
-
-- *Type:* string
-
-The file path.
-
-If this path is relative, it will be
-resolved from the root of _this_ project.
-
----
-
-##### `addPythonGitIgnore` <a name="addPythonGitIgnore" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.addPythonGitIgnore"></a>
-
-```typescript
-public addPythonGitIgnore(): void
-```
-
-##### `createDevBranch` <a name="createDevBranch" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.createDevBranch"></a>
-
-```typescript
-public createDevBranch(): void
-```
-
-Create a dev branch if it doesn't already exist, and set it as the default branch.
-
-##### `createGenericSkillCode` <a name="createGenericSkillCode" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.createGenericSkillCode"></a>
-
-```typescript
-public createGenericSkillCode(dir: string): void
-```
-
-Create a generic skill with sample code.
-
-*Example*
-
-```typescript
-"neon_phal_plugin_audio_receiver"
-```
-
-
-###### `dir`<sup>Required</sup> <a name="dir" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.createGenericSkillCode.parameter.dir"></a>
-
-- *Type:* string
-
-The name of the directory to create sample code in.
-
----
-
-
-#### Properties <a name="Properties" id="Properties"></a>
-
-| **Name** | **Type** | **Description** |
-| --- | --- | --- |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.buildTask">buildTask</a></code> | <code>projen.Task</code> | *No description.* |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.commitGenerated">commitGenerated</a></code> | <code>boolean</code> | Whether to commit the managed files by default. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.compileTask">compileTask</a></code> | <code>projen.Task</code> | *No description.* |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.components">components</a></code> | <code>projen.Component[]</code> | Returns all the components within this project. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.deps">deps</a></code> | <code>projen.Dependencies</code> | Project dependencies. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.ejected">ejected</a></code> | <code>boolean</code> | Whether or not the project is being ejected. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.files">files</a></code> | <code>projen.FileBase[]</code> | All files in this project. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.gitattributes">gitattributes</a></code> | <code>projen.GitAttributesFile</code> | The .gitattributes file for this repository. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.gitignore">gitignore</a></code> | <code>projen.IgnoreFile</code> | .gitignore. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.logger">logger</a></code> | <code>projen.Logger</code> | Logging utilities. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.name">name</a></code> | <code>string</code> | Project name. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.outdir">outdir</a></code> | <code>string</code> | Absolute output directory of this project. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.packageTask">packageTask</a></code> | <code>projen.Task</code> | *No description.* |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.postCompileTask">postCompileTask</a></code> | <code>projen.Task</code> | *No description.* |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.preCompileTask">preCompileTask</a></code> | <code>projen.Task</code> | *No description.* |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.projectBuild">projectBuild</a></code> | <code>projen.ProjectBuild</code> | Manages the build process of the project. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.projenCommand">projenCommand</a></code> | <code>string</code> | The command to use in order to run the projen CLI. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.root">root</a></code> | <code>projen.Project</code> | The root project. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.subprojects">subprojects</a></code> | <code>projen.Project[]</code> | Returns all the subprojects within this project. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.tasks">tasks</a></code> | <code>projen.Tasks</code> | Project tasks. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.testTask">testTask</a></code> | <code>projen.Task</code> | *No description.* |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.defaultTask">defaultTask</a></code> | <code>projen.Task</code> | This is the "default" task, the one that executes "projen". |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.initProject">initProject</a></code> | <code>projen.InitProject</code> | The options used when this project is bootstrapped via `projen new`. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.parent">parent</a></code> | <code>projen.Project</code> | A parent project. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.projectType">projectType</a></code> | <code>projen.ProjectType</code> | *No description.* |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.autoApprove">autoApprove</a></code> | <code>projen.github.AutoApprove</code> | Auto approve set up for this project. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.devContainer">devContainer</a></code> | <code>projen.vscode.DevContainer</code> | Access for .devcontainer.json (used for GitHub Codespaces). |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.github">github</a></code> | <code>projen.github.GitHub</code> | Access all github components. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.gitpod">gitpod</a></code> | <code>projen.Gitpod</code> | Access for Gitpod. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.vscode">vscode</a></code> | <code>projen.vscode.VsCode</code> | Access all VSCode components. |
-
----
-
-##### `buildTask`<sup>Required</sup> <a name="buildTask" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.buildTask"></a>
-
-```typescript
-public readonly buildTask: Task;
-```
-
-- *Type:* projen.Task
-
----
-
-##### `commitGenerated`<sup>Required</sup> <a name="commitGenerated" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.commitGenerated"></a>
-
-```typescript
-public readonly commitGenerated: boolean;
-```
-
-- *Type:* boolean
-
-Whether to commit the managed files by default.
-
----
-
-##### `compileTask`<sup>Required</sup> <a name="compileTask" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.compileTask"></a>
-
-```typescript
-public readonly compileTask: Task;
-```
-
-- *Type:* projen.Task
-
----
-
-##### `components`<sup>Required</sup> <a name="components" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.components"></a>
-
-```typescript
-public readonly components: Component[];
-```
-
-- *Type:* projen.Component[]
-
-Returns all the components within this project.
-
----
-
-##### `deps`<sup>Required</sup> <a name="deps" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.deps"></a>
-
-```typescript
-public readonly deps: Dependencies;
-```
-
-- *Type:* projen.Dependencies
-
-Project dependencies.
-
----
-
-##### `ejected`<sup>Required</sup> <a name="ejected" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.ejected"></a>
-
-```typescript
-public readonly ejected: boolean;
-```
-
-- *Type:* boolean
-
-Whether or not the project is being ejected.
-
----
-
-##### `files`<sup>Required</sup> <a name="files" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.files"></a>
-
-```typescript
-public readonly files: FileBase[];
-```
-
-- *Type:* projen.FileBase[]
-
-All files in this project.
-
----
-
-##### `gitattributes`<sup>Required</sup> <a name="gitattributes" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.gitattributes"></a>
-
-```typescript
-public readonly gitattributes: GitAttributesFile;
-```
-
-- *Type:* projen.GitAttributesFile
-
-The .gitattributes file for this repository.
-
----
-
-##### `gitignore`<sup>Required</sup> <a name="gitignore" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.gitignore"></a>
-
-```typescript
-public readonly gitignore: IgnoreFile;
-```
-
-- *Type:* projen.IgnoreFile
-
-.gitignore.
-
----
-
-##### `logger`<sup>Required</sup> <a name="logger" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.logger"></a>
-
-```typescript
-public readonly logger: Logger;
-```
-
-- *Type:* projen.Logger
-
-Logging utilities.
-
----
-
-##### `name`<sup>Required</sup> <a name="name" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.name"></a>
-
-```typescript
-public readonly name: string;
-```
-
-- *Type:* string
-
-Project name.
-
----
-
-##### `outdir`<sup>Required</sup> <a name="outdir" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.outdir"></a>
-
-```typescript
-public readonly outdir: string;
-```
-
-- *Type:* string
-
-Absolute output directory of this project.
-
----
-
-##### `packageTask`<sup>Required</sup> <a name="packageTask" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.packageTask"></a>
-
-```typescript
-public readonly packageTask: Task;
-```
-
-- *Type:* projen.Task
-
----
-
-##### `postCompileTask`<sup>Required</sup> <a name="postCompileTask" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.postCompileTask"></a>
-
-```typescript
-public readonly postCompileTask: Task;
-```
-
-- *Type:* projen.Task
-
----
-
-##### `preCompileTask`<sup>Required</sup> <a name="preCompileTask" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.preCompileTask"></a>
-
-```typescript
-public readonly preCompileTask: Task;
-```
-
-- *Type:* projen.Task
-
----
-
-##### `projectBuild`<sup>Required</sup> <a name="projectBuild" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.projectBuild"></a>
-
-```typescript
-public readonly projectBuild: ProjectBuild;
-```
-
-- *Type:* projen.ProjectBuild
-
-Manages the build process of the project.
-
----
-
-##### `projenCommand`<sup>Required</sup> <a name="projenCommand" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.projenCommand"></a>
-
-```typescript
-public readonly projenCommand: string;
-```
-
-- *Type:* string
-
-The command to use in order to run the projen CLI.
-
----
-
-##### `root`<sup>Required</sup> <a name="root" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.root"></a>
-
-```typescript
-public readonly root: Project;
-```
-
-- *Type:* projen.Project
-
-The root project.
-
----
-
-##### `subprojects`<sup>Required</sup> <a name="subprojects" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.subprojects"></a>
-
-```typescript
-public readonly subprojects: Project[];
-```
-
-- *Type:* projen.Project[]
-
-Returns all the subprojects within this project.
-
----
-
-##### `tasks`<sup>Required</sup> <a name="tasks" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.tasks"></a>
-
-```typescript
-public readonly tasks: Tasks;
-```
-
-- *Type:* projen.Tasks
-
-Project tasks.
-
----
-
-##### `testTask`<sup>Required</sup> <a name="testTask" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.testTask"></a>
-
-```typescript
-public readonly testTask: Task;
-```
-
-- *Type:* projen.Task
-
----
-
-##### `defaultTask`<sup>Optional</sup> <a name="defaultTask" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.defaultTask"></a>
-
-```typescript
-public readonly defaultTask: Task;
-```
-
-- *Type:* projen.Task
-
-This is the "default" task, the one that executes "projen".
-
-Undefined if
-the project is being ejected.
-
----
-
-##### `initProject`<sup>Optional</sup> <a name="initProject" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.initProject"></a>
-
-```typescript
-public readonly initProject: InitProject;
-```
-
-- *Type:* projen.InitProject
-
-The options used when this project is bootstrapped via `projen new`.
-
-It
-includes the original set of options passed to the CLI and also the JSII
-FQN of the project type.
-
----
-
-##### `parent`<sup>Optional</sup> <a name="parent" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.parent"></a>
-
-```typescript
-public readonly parent: Project;
-```
-
-- *Type:* projen.Project
-
-A parent project.
-
-If undefined, this is the root project.
-
----
-
-##### `projectType`<sup>Required</sup> <a name="projectType" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.projectType"></a>
-
-```typescript
-public readonly projectType: ProjectType;
-```
-
-- *Type:* projen.ProjectType
-
----
-
-##### `autoApprove`<sup>Optional</sup> <a name="autoApprove" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.autoApprove"></a>
-
-```typescript
-public readonly autoApprove: AutoApprove;
-```
-
-- *Type:* projen.github.AutoApprove
-
-Auto approve set up for this project.
-
----
-
-##### `devContainer`<sup>Optional</sup> <a name="devContainer" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.devContainer"></a>
-
-```typescript
-public readonly devContainer: DevContainer;
-```
-
-- *Type:* projen.vscode.DevContainer
-
-Access for .devcontainer.json (used for GitHub Codespaces).
-
-This will be `undefined` if devContainer boolean is false
-
----
-
-##### `github`<sup>Optional</sup> <a name="github" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.github"></a>
-
-```typescript
-public readonly github: GitHub;
-```
-
-- *Type:* projen.github.GitHub
-
-Access all github components.
-
-This will be `undefined` for subprojects.
-
----
-
-##### `gitpod`<sup>Optional</sup> <a name="gitpod" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.gitpod"></a>
-
-```typescript
-public readonly gitpod: Gitpod;
-```
-
-- *Type:* projen.Gitpod
-
-Access for Gitpod.
-
-This will be `undefined` if gitpod boolean is false
-
----
-
-##### `vscode`<sup>Optional</sup> <a name="vscode" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.vscode"></a>
-
-```typescript
-public readonly vscode: VsCode;
-```
-
-- *Type:* projen.vscode.VsCode
-
-Access all VSCode components.
-
-This will be `undefined` for subprojects.
-
----
-
-#### Constants <a name="Constants" id="Constants"></a>
-
-| **Name** | **Type** | **Description** |
-| --- | --- | --- |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSPHALProject.property.DEFAULT_TASK">DEFAULT_TASK</a></code> | <code>string</code> | The name of the default task (the task executed when `projen` is run without arguments). |
-
----
-
-##### `DEFAULT_TASK`<sup>Required</sup> <a name="DEFAULT_TASK" id="@mikejgray/ovos-skill-projen.OVOSPHALProject.property.DEFAULT_TASK"></a>
-
-```typescript
-public readonly DEFAULT_TASK: string;
-```
-
-- *Type:* string
-
-The name of the default task (the task executed when `projen` is run without arguments).
-
-Normally
-this task should synthesize the project files.
-
----
-
-### OVOSSkillProject <a name="OVOSSkillProject" id="@mikejgray/ovos-skill-projen.OVOSSkillProject"></a>
-
-#### Initializers <a name="Initializers" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.Initializer"></a>
-
-```typescript
-import { OVOSSkillProject } from '@mikejgray/ovos-skill-projen'
-
-new OVOSSkillProject(options: OVOSSkillProjectOptions)
-```
-
-| **Name** | **Type** | **Description** |
-| --- | --- | --- |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.Initializer.parameter.options">options</a></code> | <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions">OVOSSkillProjectOptions</a></code> | *No description.* |
-
----
-
-##### `options`<sup>Required</sup> <a name="options" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.Initializer.parameter.options"></a>
-
-- *Type:* <a href="#@mikejgray/ovos-skill-projen.OVOSSkillProjectOptions">OVOSSkillProjectOptions</a>
-
----
-
-#### Methods <a name="Methods" id="Methods"></a>
-
-| **Name** | **Description** |
-| --- | --- |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.addExcludeFromCleanup">addExcludeFromCleanup</a></code> | Exclude the matching files from pre-synth cleanup. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.addGitIgnore">addGitIgnore</a></code> | Adds a .gitignore pattern. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.addPackageIgnore">addPackageIgnore</a></code> | Exclude these files from the bundled package. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.addTask">addTask</a></code> | Adds a new task to this project. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.addTip">addTip</a></code> | Prints a "tip" message during synthesis. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.annotateGenerated">annotateGenerated</a></code> | Marks the provided file(s) as being generated. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.postSynthesize">postSynthesize</a></code> | Called after all components are synthesized. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.preSynthesize">preSynthesize</a></code> | Called before all components are synthesized. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.removeTask">removeTask</a></code> | Removes a task from a project. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.runTaskCommand">runTaskCommand</a></code> | Returns the shell command to execute in order to run a task. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.synth">synth</a></code> | Synthesize all project files into `outdir`. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindFile">tryFindFile</a></code> | Finds a file at the specified relative path within this project and all its subprojects. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindJsonFile">tryFindJsonFile</a></code> | Finds a json file by name. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindObjectFile">tryFindObjectFile</a></code> | Finds an object file (like JsonFile, YamlFile, etc.) by name. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.tryRemoveFile">tryRemoveFile</a></code> | Finds a file at the specified relative path within this project and removes it. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.addPythonGitIgnore">addPythonGitIgnore</a></code> | Add a Python .gitignore file. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createDevBranch">createDevBranch</a></code> | Create a dev branch if it doesn't already exist, and set it as the default branch. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createGenericSkillCode">createGenericSkillCode</a></code> | Create a generic skill with sample code. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.createGithubWorkflows">createGithubWorkflows</a></code> | Create OVOS standard Github Actions workflows. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.restructureLocaleFolders">restructureLocaleFolders</a></code> | Restructure locale folders to be more OVOS-like. |
-
----
-
-##### `addExcludeFromCleanup` <a name="addExcludeFromCleanup" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addExcludeFromCleanup"></a>
-
-```typescript
-public addExcludeFromCleanup(globs: string): void
-```
-
-Exclude the matching files from pre-synth cleanup.
-
-Can be used when, for example, some
-source files include the projen marker and we don't want them to be erased during synth.
-
-###### `globs`<sup>Required</sup> <a name="globs" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addExcludeFromCleanup.parameter.globs"></a>
-
-- *Type:* string
-
-The glob patterns to match.
-
----
-
-##### `addGitIgnore` <a name="addGitIgnore" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addGitIgnore"></a>
-
-```typescript
-public addGitIgnore(pattern: string): void
-```
-
-Adds a .gitignore pattern.
-
-###### `pattern`<sup>Required</sup> <a name="pattern" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addGitIgnore.parameter.pattern"></a>
-
-- *Type:* string
-
-The glob pattern to ignore.
-
----
-
-##### `addPackageIgnore` <a name="addPackageIgnore" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addPackageIgnore"></a>
-
-```typescript
-public addPackageIgnore(_pattern: string): void
-```
-
-Exclude these files from the bundled package.
-
-Implemented by project types based on the
-packaging mechanism. For example, `NodeProject` delegates this to `.npmignore`.
-
-###### `_pattern`<sup>Required</sup> <a name="_pattern" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addPackageIgnore.parameter._pattern"></a>
-
-- *Type:* string
-
-The glob pattern to exclude.
-
----
-
-##### `addTask` <a name="addTask" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addTask"></a>
-
-```typescript
-public addTask(name: string, props?: TaskOptions): Task
-```
-
-Adds a new task to this project.
-
-This will fail if the project already has
-a task with this name.
-
-###### `name`<sup>Required</sup> <a name="name" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addTask.parameter.name"></a>
-
-- *Type:* string
-
-The task name to add.
-
----
-
-###### `props`<sup>Optional</sup> <a name="props" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addTask.parameter.props"></a>
-
-- *Type:* projen.TaskOptions
-
-Task properties.
-
----
-
-##### ~~`addTip`~~ <a name="addTip" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addTip"></a>
-
-```typescript
-public addTip(message: string): void
-```
-
-Prints a "tip" message during synthesis.
-
-###### `message`<sup>Required</sup> <a name="message" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addTip.parameter.message"></a>
-
-- *Type:* string
-
-The message.
-
----
-
-##### `annotateGenerated` <a name="annotateGenerated" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.annotateGenerated"></a>
-
-```typescript
-public annotateGenerated(glob: string): void
-```
-
-Marks the provided file(s) as being generated.
-
-This is achieved using the
-github-linguist attributes. Generated files do not count against the
-repository statistics and language breakdown.
-
-> [https://github.com/github/linguist/blob/master/docs/overrides.md](https://github.com/github/linguist/blob/master/docs/overrides.md)
-
-###### `glob`<sup>Required</sup> <a name="glob" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.annotateGenerated.parameter.glob"></a>
-
-- *Type:* string
-
-the glob pattern to match (could be a file path).
-
----
-
-##### `postSynthesize` <a name="postSynthesize" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.postSynthesize"></a>
-
-```typescript
-public postSynthesize(): void
-```
-
-Called after all components are synthesized.
-
-Order is *not* guaranteed.
-
-##### `preSynthesize` <a name="preSynthesize" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.preSynthesize"></a>
-
-```typescript
-public preSynthesize(): void
-```
-
-Called before all components are synthesized.
-
-##### `removeTask` <a name="removeTask" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.removeTask"></a>
-
-```typescript
-public removeTask(name: string): Task
-```
-
-Removes a task from a project.
-
-###### `name`<sup>Required</sup> <a name="name" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.removeTask.parameter.name"></a>
-
-- *Type:* string
-
-The name of the task to remove.
-
----
-
-##### `runTaskCommand` <a name="runTaskCommand" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.runTaskCommand"></a>
-
-```typescript
-public runTaskCommand(task: Task): string
-```
-
-Returns the shell command to execute in order to run a task.
-
-By default, this is `npx projen@<version> <task>`
-
-###### `task`<sup>Required</sup> <a name="task" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.runTaskCommand.parameter.task"></a>
-
-- *Type:* projen.Task
-
-The task for which the command is required.
-
----
-
-##### `synth` <a name="synth" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.synth"></a>
-
-```typescript
-public synth(): void
-```
-
-Synthesize all project files into `outdir`.
-
-1. Call "this.preSynthesize()"
-2. Delete all generated files
-3. Synthesize all sub-projects
-4. Synthesize all components of this project
-5. Call "postSynthesize()" for all components of this project
-6. Call "this.postSynthesize()"
-
-##### `tryFindFile` <a name="tryFindFile" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindFile"></a>
-
-```typescript
-public tryFindFile(filePath: string): FileBase
-```
-
-Finds a file at the specified relative path within this project and all its subprojects.
-
-###### `filePath`<sup>Required</sup> <a name="filePath" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindFile.parameter.filePath"></a>
-
-- *Type:* string
-
-The file path.
-
-If this path is relative, it will be resolved
-from the root of _this_ project.
-
----
-
-##### ~~`tryFindJsonFile`~~ <a name="tryFindJsonFile" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindJsonFile"></a>
-
-```typescript
-public tryFindJsonFile(filePath: string): JsonFile
-```
-
-Finds a json file by name.
-
-###### `filePath`<sup>Required</sup> <a name="filePath" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindJsonFile.parameter.filePath"></a>
-
-- *Type:* string
-
-The file path.
-
----
-
-##### `tryFindObjectFile` <a name="tryFindObjectFile" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindObjectFile"></a>
-
-```typescript
-public tryFindObjectFile(filePath: string): ObjectFile
-```
-
-Finds an object file (like JsonFile, YamlFile, etc.) by name.
-
-###### `filePath`<sup>Required</sup> <a name="filePath" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.tryFindObjectFile.parameter.filePath"></a>
-
-- *Type:* string
-
-The file path.
-
----
-
-##### `tryRemoveFile` <a name="tryRemoveFile" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.tryRemoveFile"></a>
-
-```typescript
-public tryRemoveFile(filePath: string): FileBase
-```
-
-Finds a file at the specified relative path within this project and removes it.
-
-###### `filePath`<sup>Required</sup> <a name="filePath" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.tryRemoveFile.parameter.filePath"></a>
-
-- *Type:* string
-
-The file path.
-
-If this path is relative, it will be
-resolved from the root of _this_ project.
-
----
-
-##### `addPythonGitIgnore` <a name="addPythonGitIgnore" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.addPythonGitIgnore"></a>
-
-```typescript
-public addPythonGitIgnore(): void
-```
-
-Add a Python .gitignore file.
-
-##### `createDevBranch` <a name="createDevBranch" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createDevBranch"></a>
-
-```typescript
-public createDevBranch(): void
-```
-
-Create a dev branch if it doesn't already exist, and set it as the default branch.
-
-##### `createGenericSkillCode` <a name="createGenericSkillCode" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createGenericSkillCode"></a>
-
-```typescript
-public createGenericSkillCode(dir: string): void
-```
-
-Create a generic skill with sample code.
-
-*Example*
-
-```typescript
-"hello_world_skill"
-```
-
-
-###### `dir`<sup>Required</sup> <a name="dir" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createGenericSkillCode.parameter.dir"></a>
-
-- *Type:* string
-
-The name of the directory to create sample code in.
-
----
-
-##### `createGithubWorkflows` <a name="createGithubWorkflows" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createGithubWorkflows"></a>
-
-```typescript
-public createGithubWorkflows(skillLicenseTest: boolean): void
-```
-
-Create OVOS standard Github Actions workflows.
-
-###### `skillLicenseTest`<sup>Required</sup> <a name="skillLicenseTest" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.createGithubWorkflows.parameter.skillLicenseTest"></a>
-
-- *Type:* boolean
-
----
-
-##### `restructureLocaleFolders` <a name="restructureLocaleFolders" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.restructureLocaleFolders"></a>
-
-```typescript
-public restructureLocaleFolders(sourceFolder: string): void
-```
-
-Restructure locale folders to be more OVOS-like.
-
-###### `sourceFolder`<sup>Required</sup> <a name="sourceFolder" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.restructureLocaleFolders.parameter.sourceFolder"></a>
-
-- *Type:* string
-
-The name of the directory containing the Mycroft skill's code.
-
----
-
-#### Static Functions <a name="Static Functions" id="Static Functions"></a>
-
-| **Name** | **Description** |
-| --- | --- |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.modernizeSkillCode">modernizeSkillCode</a></code> | Load a Mycroft skill Python file and modernize it for OVOS. |
-
----
-
-##### `modernizeSkillCode` <a name="modernizeSkillCode" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.modernizeSkillCode"></a>
-
-```typescript
-import { OVOSSkillProject } from '@mikejgray/ovos-skill-projen'
-
-OVOSSkillProject.modernizeSkillCode(file: string)
-```
-
-Load a Mycroft skill Python file and modernize it for OVOS.
-
-###### `file`<sup>Required</sup> <a name="file" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.modernizeSkillCode.parameter.file"></a>
-
-- *Type:* string
-
-The file to modernize.
-
----
-
-#### Properties <a name="Properties" id="Properties"></a>
-
-| **Name** | **Type** | **Description** |
-| --- | --- | --- |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.buildTask">buildTask</a></code> | <code>projen.Task</code> | *No description.* |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.commitGenerated">commitGenerated</a></code> | <code>boolean</code> | Whether to commit the managed files by default. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.compileTask">compileTask</a></code> | <code>projen.Task</code> | *No description.* |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.components">components</a></code> | <code>projen.Component[]</code> | Returns all the components within this project. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.deps">deps</a></code> | <code>projen.Dependencies</code> | Project dependencies. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.ejected">ejected</a></code> | <code>boolean</code> | Whether or not the project is being ejected. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.files">files</a></code> | <code>projen.FileBase[]</code> | All files in this project. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.gitattributes">gitattributes</a></code> | <code>projen.GitAttributesFile</code> | The .gitattributes file for this repository. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.gitignore">gitignore</a></code> | <code>projen.IgnoreFile</code> | .gitignore. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.logger">logger</a></code> | <code>projen.Logger</code> | Logging utilities. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.name">name</a></code> | <code>string</code> | Project name. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.outdir">outdir</a></code> | <code>string</code> | Absolute output directory of this project. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.packageTask">packageTask</a></code> | <code>projen.Task</code> | *No description.* |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.postCompileTask">postCompileTask</a></code> | <code>projen.Task</code> | *No description.* |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.preCompileTask">preCompileTask</a></code> | <code>projen.Task</code> | *No description.* |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.projectBuild">projectBuild</a></code> | <code>projen.ProjectBuild</code> | Manages the build process of the project. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.projenCommand">projenCommand</a></code> | <code>string</code> | The command to use in order to run the projen CLI. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.root">root</a></code> | <code>projen.Project</code> | The root project. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.subprojects">subprojects</a></code> | <code>projen.Project[]</code> | Returns all the subprojects within this project. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.tasks">tasks</a></code> | <code>projen.Tasks</code> | Project tasks. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.testTask">testTask</a></code> | <code>projen.Task</code> | *No description.* |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.defaultTask">defaultTask</a></code> | <code>projen.Task</code> | This is the "default" task, the one that executes "projen". |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.initProject">initProject</a></code> | <code>projen.InitProject</code> | The options used when this project is bootstrapped via `projen new`. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.parent">parent</a></code> | <code>projen.Project</code> | A parent project. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.projectType">projectType</a></code> | <code>projen.ProjectType</code> | *No description.* |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.autoApprove">autoApprove</a></code> | <code>projen.github.AutoApprove</code> | Auto approve set up for this project. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.devContainer">devContainer</a></code> | <code>projen.vscode.DevContainer</code> | Access for .devcontainer.json (used for GitHub Codespaces). |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.github">github</a></code> | <code>projen.github.GitHub</code> | Access all github components. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.gitpod">gitpod</a></code> | <code>projen.Gitpod</code> | Access for Gitpod. |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.vscode">vscode</a></code> | <code>projen.vscode.VsCode</code> | Access all VSCode components. |
-
----
-
-##### `buildTask`<sup>Required</sup> <a name="buildTask" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.buildTask"></a>
-
-```typescript
-public readonly buildTask: Task;
-```
-
-- *Type:* projen.Task
-
----
-
-##### `commitGenerated`<sup>Required</sup> <a name="commitGenerated" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.commitGenerated"></a>
-
-```typescript
-public readonly commitGenerated: boolean;
-```
-
-- *Type:* boolean
-
-Whether to commit the managed files by default.
-
----
-
-##### `compileTask`<sup>Required</sup> <a name="compileTask" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.compileTask"></a>
-
-```typescript
-public readonly compileTask: Task;
-```
-
-- *Type:* projen.Task
-
----
-
-##### `components`<sup>Required</sup> <a name="components" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.components"></a>
-
-```typescript
-public readonly components: Component[];
-```
-
-- *Type:* projen.Component[]
-
-Returns all the components within this project.
-
----
-
-##### `deps`<sup>Required</sup> <a name="deps" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.deps"></a>
-
-```typescript
-public readonly deps: Dependencies;
-```
-
-- *Type:* projen.Dependencies
-
-Project dependencies.
-
----
-
-##### `ejected`<sup>Required</sup> <a name="ejected" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.ejected"></a>
-
-```typescript
-public readonly ejected: boolean;
-```
-
-- *Type:* boolean
-
-Whether or not the project is being ejected.
-
----
-
-##### `files`<sup>Required</sup> <a name="files" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.files"></a>
-
-```typescript
-public readonly files: FileBase[];
-```
-
-- *Type:* projen.FileBase[]
-
-All files in this project.
-
----
-
-##### `gitattributes`<sup>Required</sup> <a name="gitattributes" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.gitattributes"></a>
-
-```typescript
-public readonly gitattributes: GitAttributesFile;
-```
-
-- *Type:* projen.GitAttributesFile
-
-The .gitattributes file for this repository.
-
----
-
-##### `gitignore`<sup>Required</sup> <a name="gitignore" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.gitignore"></a>
-
-```typescript
-public readonly gitignore: IgnoreFile;
-```
-
-- *Type:* projen.IgnoreFile
-
-.gitignore.
-
----
-
-##### `logger`<sup>Required</sup> <a name="logger" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.logger"></a>
-
-```typescript
-public readonly logger: Logger;
-```
-
-- *Type:* projen.Logger
-
-Logging utilities.
-
----
-
-##### `name`<sup>Required</sup> <a name="name" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.name"></a>
-
-```typescript
-public readonly name: string;
-```
-
-- *Type:* string
-
-Project name.
-
----
-
-##### `outdir`<sup>Required</sup> <a name="outdir" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.outdir"></a>
-
-```typescript
-public readonly outdir: string;
-```
-
-- *Type:* string
-
-Absolute output directory of this project.
-
----
-
-##### `packageTask`<sup>Required</sup> <a name="packageTask" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.packageTask"></a>
-
-```typescript
-public readonly packageTask: Task;
-```
-
-- *Type:* projen.Task
-
----
-
-##### `postCompileTask`<sup>Required</sup> <a name="postCompileTask" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.postCompileTask"></a>
-
-```typescript
-public readonly postCompileTask: Task;
-```
-
-- *Type:* projen.Task
-
----
-
-##### `preCompileTask`<sup>Required</sup> <a name="preCompileTask" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.preCompileTask"></a>
-
-```typescript
-public readonly preCompileTask: Task;
-```
-
-- *Type:* projen.Task
-
----
-
-##### `projectBuild`<sup>Required</sup> <a name="projectBuild" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.projectBuild"></a>
-
-```typescript
-public readonly projectBuild: ProjectBuild;
-```
-
-- *Type:* projen.ProjectBuild
-
-Manages the build process of the project.
-
----
-
-##### `projenCommand`<sup>Required</sup> <a name="projenCommand" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.projenCommand"></a>
-
-```typescript
-public readonly projenCommand: string;
-```
-
-- *Type:* string
-
-The command to use in order to run the projen CLI.
-
----
-
-##### `root`<sup>Required</sup> <a name="root" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.root"></a>
-
-```typescript
-public readonly root: Project;
-```
-
-- *Type:* projen.Project
-
-The root project.
-
----
-
-##### `subprojects`<sup>Required</sup> <a name="subprojects" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.subprojects"></a>
-
-```typescript
-public readonly subprojects: Project[];
-```
-
-- *Type:* projen.Project[]
-
-Returns all the subprojects within this project.
-
----
-
-##### `tasks`<sup>Required</sup> <a name="tasks" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.tasks"></a>
-
-```typescript
-public readonly tasks: Tasks;
-```
-
-- *Type:* projen.Tasks
-
-Project tasks.
-
----
-
-##### `testTask`<sup>Required</sup> <a name="testTask" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.testTask"></a>
-
-```typescript
-public readonly testTask: Task;
-```
-
-- *Type:* projen.Task
-
----
-
-##### `defaultTask`<sup>Optional</sup> <a name="defaultTask" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.defaultTask"></a>
-
-```typescript
-public readonly defaultTask: Task;
-```
-
-- *Type:* projen.Task
-
-This is the "default" task, the one that executes "projen".
-
-Undefined if
-the project is being ejected.
-
----
-
-##### `initProject`<sup>Optional</sup> <a name="initProject" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.initProject"></a>
-
-```typescript
-public readonly initProject: InitProject;
-```
-
-- *Type:* projen.InitProject
-
-The options used when this project is bootstrapped via `projen new`.
-
-It
-includes the original set of options passed to the CLI and also the JSII
-FQN of the project type.
-
----
-
-##### `parent`<sup>Optional</sup> <a name="parent" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.parent"></a>
-
-```typescript
-public readonly parent: Project;
-```
-
-- *Type:* projen.Project
-
-A parent project.
-
-If undefined, this is the root project.
-
----
-
-##### `projectType`<sup>Required</sup> <a name="projectType" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.projectType"></a>
-
-```typescript
-public readonly projectType: ProjectType;
-```
-
-- *Type:* projen.ProjectType
-
----
-
-##### `autoApprove`<sup>Optional</sup> <a name="autoApprove" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.autoApprove"></a>
-
-```typescript
-public readonly autoApprove: AutoApprove;
-```
-
-- *Type:* projen.github.AutoApprove
-
-Auto approve set up for this project.
-
----
-
-##### `devContainer`<sup>Optional</sup> <a name="devContainer" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.devContainer"></a>
-
-```typescript
-public readonly devContainer: DevContainer;
-```
-
-- *Type:* projen.vscode.DevContainer
-
-Access for .devcontainer.json (used for GitHub Codespaces).
-
-This will be `undefined` if devContainer boolean is false
-
----
-
-##### `github`<sup>Optional</sup> <a name="github" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.github"></a>
-
-```typescript
-public readonly github: GitHub;
-```
-
-- *Type:* projen.github.GitHub
-
-Access all github components.
-
-This will be `undefined` for subprojects.
-
----
-
-##### `gitpod`<sup>Optional</sup> <a name="gitpod" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.gitpod"></a>
-
-```typescript
-public readonly gitpod: Gitpod;
-```
-
-- *Type:* projen.Gitpod
-
-Access for Gitpod.
-
-This will be `undefined` if gitpod boolean is false
-
----
-
-##### `vscode`<sup>Optional</sup> <a name="vscode" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.vscode"></a>
-
-```typescript
-public readonly vscode: VsCode;
-```
-
-- *Type:* projen.vscode.VsCode
-
-Access all VSCode components.
-
-This will be `undefined` for subprojects.
-
----
-
-#### Constants <a name="Constants" id="Constants"></a>
-
-| **Name** | **Type** | **Description** |
-| --- | --- | --- |
-| <code><a href="#@mikejgray/ovos-skill-projen.OVOSSkillProject.property.DEFAULT_TASK">DEFAULT_TASK</a></code> | <code>string</code> | The name of the default task (the task executed when `projen` is run without arguments). |
-
----
-
-##### `DEFAULT_TASK`<sup>Required</sup> <a name="DEFAULT_TASK" id="@mikejgray/ovos-skill-projen.OVOSSkillProject.property.DEFAULT_TASK"></a>
-
-```typescript
-public readonly DEFAULT_TASK: string;
-```
-
-- *Type:* string
-
-The name of the default task (the task executed when `projen` is run without arguments).
-
-Normally
-this task should synthesize the project files.
-
----
 
 

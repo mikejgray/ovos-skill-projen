@@ -1,19 +1,19 @@
+from typing import Optional
+
 from ovos_utils import classproperty
 from ovos_utils.process_utils import RuntimeRequirements
-from ovos_workshop.intents import IntentBuilder
 from ovos_workshop.decorators import intent_handler
+from ovos_workshop.intents import IntentBuilder
+
 # from ovos_workshop.intents import IntentHandler # Uncomment to use Adapt intents
 from ovos_workshop.skills import OVOSSkill
 
 # Optional - if you want to populate settings.json with default values, do so here
-DEFAULT_SETTINGS = {
-    "setting1": True,
-    "setting2": 50,
-    "setting3": "test"
-}
+DEFAULT_SETTINGS = {"setting1": True, "setting2": 50, "setting3": "test"}
+
 
 class HelloWorldSkill(OVOSSkill):
-    def __init__(self, *args, bus=None, **kwargs):
+    def __init__(self, *args, bus=None, skill_id="", **kwargs):
         """The __init__ method is called when the Skill is first constructed.
         Note that self.bus, self.skill_id, self.settings, and
         other base class settings are only available after the call to super().
@@ -21,7 +21,7 @@ class HelloWorldSkill(OVOSSkill):
         This is a good place to load and pre-process any data needed by your
         Skill, ideally after the super() call.
         """
-        super().__init__(*args, bus=bus, **kwargs)
+        super().__init__(*args, bus=bus, skill_id=skill_id, **kwargs)
         self.learning = True
 
     def initialize(self):
@@ -62,17 +62,13 @@ class HelloWorldSkill(OVOSSkill):
         """This is an Adapt intent handler, it is triggered by a keyword.
         Skills can log useful information. These will appear in the CLI and
         the skills.log file."""
-        self.log.info("There are five types of log messages: " "info, debug, warning, error, and exception.")
+        self.log.info(
+            "There are five types of log messages: "
+            "info, debug, warning, error, and exception."
+        )
         self.speak_dialog("hello_world")
 
-    @intent_handler(IntentBuilder("RoboticsLawsIntent").require("LawKeyword").build())
-    def handle_robotic_laws_intent(self, message):
-        """This is an Adapt intent handler, but using a RegEx intent."""
-        # Optionally, get the RegEx group from the intent message
-        # law = str(message.data.get("LawOfRobotics", "all"))
-        self.speak_dialog("robotics")
-
-    def stop(self):
+    def stop(self) -> Optional[bool]:
         """Optional action to take when "stop" is requested by the user.
         This method should return True if it stopped something or
         False (or None) otherwise.

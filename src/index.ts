@@ -122,10 +122,15 @@ from ovos_bus_client.message import Message`;
       if (line.startsWith('from adapt.intent import IntentBuilder')) {
         skillFileArray[index] = `# TODO: Replace Adapt IntentBuilder import\n# ${line}`;
       }
+      // Convert to new style skill
+      if (line.includes('def __init__(')) {
+        skillFileArray[index] = `# TODO: Convert to new style skill\n# ${line}
+# TODO: Replace args with \`*args, bus=None, skill_id='', **kwargs\``;
+      };
       // Best practices for super().__init__
       if (line.includes('super().__init__') && line.includes('name=')) {
         skillFileArray[index] = `# TODO: Remove name= parameter from super().__init__
-# TODO: Replace args with *args, **kwargs
+# TODO: Replace args with self, *args, bus=bus, skill_id=skill_id, **kwargs
 ${line}`;
       }
       // Deprecated create_skill()
@@ -257,7 +262,6 @@ ${line}`;
         'locale/en-us/dialog/robotics.dialog': 'I am not bound by the laws of robotics',
         'locale/en-us/vocab/HelloWorldKeyword.voc': 'hello world\ngreetings',
         'locale/en-us/intents/HowAreYou.intent': 'how are you( doing|)\nhow have you been\nhow has your day been',
-        'locale/en-us/regex/Law.rx': '(the|is) (?P<LawOfRobotics>.*) (law of robotic|law of robotics)',
       },
     });
   }
