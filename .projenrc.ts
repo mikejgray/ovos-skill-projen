@@ -1,5 +1,4 @@
 import { cdk } from 'projen';
-import { GithubCredentials } from 'projen/lib/github';
 import { NpmAccess } from 'projen/lib/javascript';
 
 const project = new cdk.JsiiProject({
@@ -13,12 +12,7 @@ const project = new cdk.JsiiProject({
   npmRegistryUrl: 'https://npm.pkg.github.com',
   releaseToNpm: true,
   npmAccess: NpmAccess.PUBLIC,
-  depsUpgradeOptions: {
-    workflowOptions: {
-      projenCredentials:
-        GithubCredentials.fromPersonalAccessToken({ secret: 'GITHUB_TOKEN' }),
-    },
-  },
+  depsUpgrade: false,
   githubOptions: { mergify: false },
   license: 'Apache-2.0',
 
